@@ -1,0 +1,274 @@
+Linked Creatures - developed by Fenn of BES Oasis shard
+================
+If you choose to use this or develop on this, please leave this file intact.
+
+
+Version:  Last modified Monday, April 7, 2008
+========
+
+
+Changelog:
+==========
+
+Version 2008-04-07
+	-added the example command [gendemontriumvirate that places spawners for demon triumvirate on three islands 
+	 around the Felucca shrine of Valor
+	-added boolean property "BuffOthersOnKill", which will cause linked creatures to give some
+	 hitpoints to other linked creatures, and increase their resistances (to a max of 95).  With this set true,
+	 the survivors of a linked creature set will become more difficult.
+
+Version 2008-04-01
+	-added some more properties to BaseLinkedCreature to give more control over link rule customization.
+	See notes.txt for details
+	-added "guarded" doors and teleporters, that can deny access to (and boot players/pets from) a "guarded
+	region" until whatever guarding linked creatures are defeated.  Details in notes.txt
+	-added some documentation about spawning linked creatures.  Details in notes.txt
+	-added several more examples of linked creatures
+
+Version 2008-03-31
+	-Initial release
+
+
+Compatibility:
+--------------
+
+This was developed using a RunUO 2.0 SVN 286 server.  Compatibility with other servers is
+guaranteed only so far as compatibility with a RunUO 2.0 SVN 286 server.  
+
+-RunUO 2.0 SVN version 286 (downloaded Feb 27, 2008)
+
+
+Notes:
+------
+
+-Use of this package should require little understanding of how it works.  Modification of the items provided
+should also require little understanding of it.  
+
+
+General Idea:
+-------------
+
+Linked creatures are based on BaseMobile's, which make up pretty much every NPC monster you'll ever find.  
+The difference, is they cannot be damaged or killed unless every linked creature is being attacked 
+simultaneously.  You can easily make a linked creature by copying your favorite creature class, making it
+an inherited class of BaseLinkedCreature, and giving it some unique name (eg. Dragon -> LinkedDragon).
+
+How a creature links with other creatures depends on how you tell it to.  It can link to creatures within
+a region where they spawn (for maximum effectiveness I recommend setting your spawner to spawn all at once),
+or you can tell them to link globally (meaning it will connect up with any "linkable" creature in the world).
+
+The whole point of this is to provide a new way to encourage multiplayer group participation.  If you're 
+looking for a way to get your players to work together, then what better way than to stick several linked 
+creatures all around the world, and have them form parties to synchronize their attacks?  Or maybe there's a 
+swarm guarding a locked gate, and the only way to open it is to clear the room of several pesky rats (which 
+are undefeatable unless each rat is taken down simultaneously).
+
+Don't like pets?  Neither do I!  If you want your linked creature invulnerable to pets, there's a toggle for
+that, and pets will be both ineffective in damage, and will not register as an attacker for the synchronous
+attack check.  If you're really mean, you can set the linked creature to kill pets the second they come into 
+contact.
+
+
+Warning!!
+---------
+ 
+A word of caution.  Each linked creature will need at least one aggressor attacking it for any linked creature
+to take damage.  If you make a room full of these, you had better expect there to be enough players and pets
+to go around.  Either that, or make sure your linked creatures can be provoked on each other.  If you fill
+the room with more attackables than attackers, they will be undefeatable.  Even [kill won't touch them!!
+
+In the event you need to remove these creatures, I recommend you turn off your spawner, and use the [remove
+command rather than the [kill command.
+
+
+Limitations:
+------------
+
+For obvious reasons, linked creatures must not be made tamable.  This is enforced in the file 
+BaseLinkedCreature.cs, and even if you set Tamable = true in your customized linked creature, you still
+will not be able to tame it based on the code I put in there.  If you feel like messing with it and making
+them tamable, then don't be surprised if your players are walking around with indestructable monsters.
+
+Also, I have no clue how the custom shrink system or taming BOD system will behave with these.  
+I would expect it to be messy.  I would suggest you don't try.  
+
+
+Creating Linked Creatures:
+-------------------------
+
+A few example linked creatures can be found in the "Defined Examples" folder.  All that needs to be done to make your own
+is to copy your favorite mobile you want to make linked, give it a new class name (eg. Cow -> LinkedCow),
+make it inherit from BaseLinkedCreature and then attach the (optional) linking controls within the class 
+(before the constructor is a good place).
+
+
+Linking Controls:
+-----------------
+
+You can define how one creature links to another by modifying a set of parameters.  To illustrate these
+controls, I have made a few example creatures in the "Defined Examples" folder.  Feel free to modify these, play with
+their settings, and add to them as you see fit.
+
+
+There's a block at the top of the example creatures that looks like this (true/false values may be different).
+
+		//set this true to allow them to link to any linkable anywhere in the world
+		public override bool GlobalScopeLink{ get{ return false; } }
+		
+		//set this true to allow them to link to other cross-creature linkable types of linkable creatures
+		public override bool CrossCreatureLink{ get{ return false; } }
+		
+		//set this false in an inherited class to disallow them to link with the same class of creature
+		public virtual bool LinkToSameClass{ get{ return true; } }
+		
+		//set this true in an inherited class to allow the creature to link with linkable creatures in an opposite scope ( global vs. local )
+		public virtual bool CrossScopeLink{ get{ return false; } }
+
+		//set this true in an inherited creature to disallow pets from damaging the creature
+		public virtual bool BlockPetDamage{ get{ return false; } }
+		
+		//set this true in an inherited creature to slaughter pets on contact
+		public virtual bool KillPets{ get{ return false; } }
+		
+		//set this higher in an inherited creature to force this number to link before the creatures are attackable
+		public virtual int MinLinkNum{ get{ return 0; } }
+		
+		//set this in an inherited creature to cap the number to link.  0 means unlimited # of links
+		public virtual int MaxLinkNum{ get{ return 0; } }
+		
+		//set this true in an inherited creature to force all creatures to be killed at once
+		public virtual bool SynchKill{ get{ return false; } }
+		
+		//set this true in an inherited creature to buff all surviving creatures when one is killed
+		public virtual bool BuffOthersOnKill{ get{ return false; } }
+		
+
+Details listed below.
+
+GlobalScopeLink:  
+
+	False:	-the creatures will only look in their immediate vicinity for creatures to link to
+	True: 	-the creatures will link to any linkable candidates anywhere in the world
+	
+CrossCreatureLink:
+
+	False: 	-will not attempt to link to other types of linked creatures (eg. LinkedDragon will not link with LinkedOrc)
+			-will refuse linking with other types of linked creatures
+	True:	-will link to other types of linked creatures that also have CrossCreatureLink set true
+	
+	
+LinkToSameClass:
+	
+	False:	-will not link to same class.  Make sure CrossCreatureLink is set true or this creature will never link
+	True:	-will link to creatures of the same class
+	
+	
+CrossScopeLink:
+
+	False:	-will not attempt to link to creatures with different GlobalScopeLink value.  Meaning a global-linking critter will not link
+			 with a vicinity-linking critter			
+			-will deny linking with creatures with a different GlobalScopeLink value
+	True:	-will attempt to link to creatures with a different GlobalScopeLink value
+
+BlockPetDamage:
+	
+	False:	-pets can be used as normal to engage and damage the linked creature
+	True:	-pets will not do damage to the linked creature
+			-only players can perform the synchronous attacking
+
+KillPets:
+
+	False:	-no effect
+	True:	-when a pet is attacked, or a pet attacks, it is killed
+
+MinLinkNum:
+
+Integer count of how many other creatures this must link to before it becomes visible to players.  The
+creature will remain hidden until the number of linked creatures is at least this.
+
+MaxLinkNum:
+
+Integer count of how many other creatures this can link to.  If the creature has linked to this number 
+(including itself), it will refuse any more links.
+
+
+SynchKill:
+
+	false:	-when the creature is able to take damage, it can be damaged and killed without regard of the
+			 linked creatures' health
+	true:	-when the creature is able to take damage, it cannot be killed until all the linked creatures
+			 are also near death
+
+			 
+BuffOthersOnKill:
+
+	false:	-nothing happens
+	true:	-when this creature dies, it will give 10% of its max hitpoints to all creatures linked to it, and
+			will increase their resists by 5% of its resists, up to a max of 95
+			
+			 			 
+Spawning Linked Creatures:
+-------------------------
+
+You should be able to create them through any conventional means, like [add, spawners, etc.  When a linked
+creature is added, it is first introduced hidden, frozen, and invulnerable.  This is temporary, and lasts
+until the creature has successfully linked (or attempted to link) to other linked creatures.  If the creature
+requires a minimum number of links, it will remain invisible until other creatures link up to it, and satisfy
+its minimum link requirement.  After the creature is visible, it can be attacked by players subject to the
+simultaneous attack of linked creatures rule.
+			 
+There is a lot of flexibility of how or where you spawn the creatures.  For example, if you want to have several 
+monsters spread all around the world, and want them all to spawn before players can attempt to bring them down, 
+then do the following:
+	-develop a linked creature that links with global scope, and set the minimum link number to match the
+	number you want to spawn
+	-set down one spawner for each creature, and tell the spawner to spawn only one.  Set respawn delays to
+	whatever you desire
+	
+When the creatures spawn, they will remain hidden until all have spawned.  Players cannot attempt to bring
+them down prematurely.
+
+More examples will be listed if requested.
+
+			 
+Guarded Doors/Teleporters:
+-------------------------
+
+As an extension of the linked creature system, the guarded door/teleporter system can be used to block
+access to some location until the "guarding" linked creatures are dispatched.  Just as how linked creatures
+can be linked locally or globally, so too can the guarded passages be guarded locally or globally.  If you
+set up a door to be guarded by linked creatures that link globally, then the door will not be openable until all
+the linked creatures are dispatched.
+
+The region that is guarded can be specified.  When players kill the guarding linked creatures, and gain access
+to this region, they are free to walk within it and the door or teleporter is usable.  If the creatures
+should respawn and the door/teleporter once again be considered guarded, then any players or pets within
+the specified guarded region will be booted out to a (specified) kick point.  This allows for the ability
+to have a self-resetting multiplayer quest, without the worry of exploitation by camping the guarded region
+which provides the quest reward.
+
+To specify what creature type guards the door/teleporter, simply [props the door/teleporter and configure 
+as desired.  To edit this property using [props, select the right arrow, and use the provided target cursor
+to target an instance of the desired guard creature.  You need not leave this instance alive, as the system
+records the type and is done with the instance provided.
+
+Other properties, such as the guarded region and kick point can also be configured through [props.  Note that
+the kick action is disabled if the kick point or guarded region is not specified.
+
+
+Installation:
+-------------
+
+Drop this folder somewhere in your scripts folder.  Preferrably under a Custom folder for easy finding.
+
+
+Deinstallation:
+---------------
+
+Remove this folder.  Be mindful of instanced mobiles in your world save once you remove the script, though.
+
+
+Contact:
+--------
+
+Questions, comments?  Contact me at the RunUO Forums under username Fenn.

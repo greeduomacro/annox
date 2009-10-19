@@ -1,0 +1,56 @@
+// Created by Script Creator
+// From Aries at Revenge of the Gods
+using System;
+using Server;
+namespace Server.Items
+{
+ public class LightningStrike : CompositeBow
+ {
+ public override int InitMinHits{ get{ return 100;}}
+ public override int InitMaxHits{ get{ return 100;}}
+ [Constructable]
+ public LightningStrike()
+     {
+         Name = "Lightning Strike";
+	 Hue = 0x7c9;
+         WeaponAttributes.HitLightning = 100;
+         WeaponAttributes.HitMagicArrow = 20;
+         WeaponAttributes.ResistColdBonus = 5;
+         WeaponAttributes.ResistEnergyBonus = 70;
+         WeaponAttributes.SelfRepair = 5;
+         WeaponAttributes.UseBestSkill = 1;
+         Attributes.BonusHits = 50;
+         Attributes.SpellChanneling = 1;
+         Attributes.BonusMana = 50;
+         Attributes.SpellDamage = 35;
+         Attributes.CastRecovery = 2;
+         Attributes.CastSpeed = 2;
+         IntRequirement = 100;
+         Slayer = SlayerName.Repond;
+         SkillBonuses.SetValues( 0, SkillName.Magery, 15.0 );
+         Attributes.CastSpeed = 2;
+         Attributes.CastRecovery = 2;
+     }
+public override void GetDamageTypes( Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy )
+    {
+            phys = 100;
+            cold = 0;
+            fire = 0;
+            nrgy = 0;
+            pois = 0;
+     }
+public LightningStrike( Serial serial ) : base( serial )
+{
+}
+public override void Serialize( GenericWriter writer )
+{
+     base.Serialize( writer );
+     writer.Write( (int) 0 );
+ }
+     public override void Deserialize(GenericReader reader)
+         {
+             base.Deserialize( reader );
+             int version = reader.ReadInt();
+         }
+     }
+}

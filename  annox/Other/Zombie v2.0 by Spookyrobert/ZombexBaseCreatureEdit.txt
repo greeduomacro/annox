@@ -1,0 +1,47 @@
+			After:
+
+			if ( m_ReceivedHonorContext != null )
+				m_ReceivedHonorContext.OnTargetKilled();
+			
+
+			Paste this:
+
+			//Start Zombiex edit
+			 
+			Mobile killerx = this.FindMostRecentDamager( true );
+
+			if ( killerx is Zombiex )
+			{
+
+				//What Should the Zombie virus not affect
+				if ( this.Summoned || this is Zombiex || this is AncientLich || this is Bogle || this is LichLord || this is Shade || this is Spectre || this is Wraith || this is BoneKnight || this is Ghoul || this is Mummy || this is SkeletalKnight || this is Skeleton || this is Zombie || this is ShadowKnight || this is DarknightCreeper || this is RevenantLion || this is LadyOfTheSnow || this is RottingCorpse || this is SkeletalDragon || this is AirElemental || this is IceElemental || this is ToxicElemental || this is PoisonElemental || this is FireElemental || this is WaterElemental || this is EarthElemental || this is Efreet || this is SnowElemental || this is AgapiteElemental || this is BronzeElemental || this is CopperElemental || this is DullCopperElemental || this is GoldenElemental || this is ShadowIronElemental || this is ValoriteElemental || this is VeriteElemental || this is BloodElemental ) 
+				{
+					return base.OnBeforeDeath();
+				}
+				else 
+				{
+				
+				
+					Zombiex zomb = new Zombiex();
+					
+					zomb.Map = this.Map;
+					zomb.Female = this.Female;
+					zomb.Body = this.Body;
+					zomb.Location = this.Location;
+					zomb.Hue = 768;
+					zomb.Name = this.Name;
+					zomb.Title = "*Infected*";
+					
+					
+					zomb.HitsMaxSeed = this.HitsMax + 100;
+					zomb.Hits = this.HitsMax + 100;
+					zomb.DamageMin = this.DamageMin;
+					zomb.DamageMax = this.DamageMax;
+					zomb.Str = this.Str + 100; 
+					this.Delete();
+					new Zombiex();
+				}
+			}
+			//End Zombiex edit
+			
+		

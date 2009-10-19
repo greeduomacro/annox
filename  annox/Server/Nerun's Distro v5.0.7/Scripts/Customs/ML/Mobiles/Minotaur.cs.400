@@ -1,0 +1,103 @@
+using System;
+using System.Collections;
+using Server.Items;
+using Server.Targeting;
+
+namespace Server.Mobiles
+{
+	[CorpseName( "a minotaur corpse" )]
+	
+	public class Minotaur : BaseCreature
+	{
+		public override WeaponAbility GetWeaponAbility()
+		{
+			return WeaponAbility.CrushingBlow;
+		}
+		[Constructable]
+		public Minotaur() : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )
+		{
+			Name = "a minotaur";
+			Body = 263;
+			BaseSoundID = 680;
+
+			SetStr( 956, 965 );
+			SetDex( 782, 790 );
+			SetInt( 564, 577 );
+
+			SetHits( 832, 842 );
+
+			SetDamage( 17, 23 );
+
+			SetDamageType( ResistanceType.Physical, 100 );			
+
+			SetResistance( ResistanceType.Physical, 65, 75 );
+			SetResistance( ResistanceType.Cold, 60, 70 );
+			SetResistance( ResistanceType.Poison, 100 );
+			SetResistance( ResistanceType.Energy, 40, 50 );
+			SetResistance( ResistanceType.Fire, 60, 70 );
+
+			SetSkill( SkillName.Anatomy, 85.1, 89.2 );
+			SetSkill( SkillName.Tactics, 95.1, 98.4 );
+			SetSkill( SkillName.Wrestling, 95.1, 97.0 );
+
+			Fame = 17000;
+			Karma = -17000;
+
+			VirtualArmor = 55;
+
+			PackItem( new Club() );
+		}
+
+		public override void GenerateLoot()
+		{
+			AddLoot( LootPack.FilthyRich, 2 );
+			AddLoot( LootPack.Rich );
+		}
+			public override int GetAttackSound()
+		{
+			return 682;
+		}
+
+		public override int GetAngerSound()
+		{
+			return 681;
+		}
+
+		public override int GetDeathSound()
+		{
+			return 684;
+		}
+
+		public override int GetHurtSound()
+		{
+			return 683;
+		}
+
+		public override int GetIdleSound()
+		{
+			return 680;
+		}
+
+		public override int Meat { get { return 15; } }
+		public override int Hides { get { return 10; } }
+		public override HideType HideType { get { return HideType.Regular; } }
+		public override Poison PoisonImmune{ get{ return Poison.Regular; } }
+		public override int TreasureMapLevel{ get{ return 3; } }
+
+		public Minotaur( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 0 );
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+}

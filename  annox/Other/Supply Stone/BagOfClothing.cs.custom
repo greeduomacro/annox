@@ -1,0 +1,48 @@
+using System;
+using Server;
+using Server.Items;
+
+namespace Server.Items
+{
+    public class BagOfClothing : Bag
+    {
+        [Constructable]
+        public BagOfClothing()
+            : this(1)
+        {
+            Name = "Bag of Clothing";
+        }
+
+        [Constructable]
+        public BagOfClothing(int amount)
+        {
+            DropItem(new Robe());
+            DropItem(new BodySash());
+            DropItem(new Bandana());
+            DropItem(new LongPants());
+            DropItem(new Shirt());
+            DropItem(new Cloak());
+            DropItem(new DyeTub());
+            DropItem(new Dyes());
+        }
+
+        public BagOfClothing(Serial serial)
+            : base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+
+            writer.Write((int)0); // version
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+
+            int version = reader.ReadInt();
+        }
+    }
+}

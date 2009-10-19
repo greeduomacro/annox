@@ -1,0 +1,49 @@
+Step #1:
+
+Find the OnLogin in the Playermobile.
+
+		private static void OnLogin( LoginEventArgs e )
+		{
+			Mobile from = e.Mobile;
+
+			SacrificeVirtue.CheckAtrophy( from );
+			JusticeVirtue.CheckAtrophy( from );
+			CompassionVirtue.CheckAtrophy( from );
+
+//<<Then add:>>
+
+//Anti Res Kill Addon <Start>
+            if( ( from.Blessed == true) && ( from.AccessLevel == AccessLevel.Player))
+                from.Blessed = false;
+//Anti Res Kill Addon <End>
+
+
+----------------------------------------------------------------------
+Step #2:
+
+Find the Resurrect in the Playermobile.
+
+		public override void Resurrect()
+		{
+			bool wasAlive = this.Alive;
+			base.Resurrect();
+
+			if ( this.Alive && !wasAlive )
+			{
+
+//<<Then add:>>
+
+//Anti Res Kill Addon <Start>
+				this.Blessed = true;
+				this.Frozen = true;
+				this.SendGump( new AntiResKillGump() ); 
+//Anti Res Kill Addon <End>
+
+
+-----------------------------------------------------------------------
+Step #3:
+
+Delete all old RK Timer (Anti Res Kill) edits that are for the previous version of this system.
+
+
+

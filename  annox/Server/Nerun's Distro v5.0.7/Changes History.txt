@@ -1,0 +1,40 @@
+NERUN'S DISTRO CHANGES HISTORY:
+
+[b]Changes 5.0.6:[/b]
+- Tokuno maps 65% revised (9 spawners removed);
+- GenStealArties command added to Create World gump;
+
+[b]Changes 5.0.5:[/b]
+- shard crash bug fixed: Save and Remove by region commands;
+
+[b]Changes 5.0.4:[/b]
+- Fetid Essence bodyvalue fixed;
+- PremiumSpawner engine small improvement;
+- Malas maps 100% revised (81 spawners removed);
+- SpawnEditor updated to show fake spawns (sub spawners);
+
+[b]Changes 5.0.3 (Emergencial):[/b]
+- don't need to steal items inside the dungeons TreasureChests;
+- land creatures will no more spawn in black areas, under ground etc;
+
+[b]Changes 5.0.2:[/b]
+- GenChampions updated with Tokuno SleepingDragon champion;
+- ChampionSpawnController added (at Felucca: 1415 1695 0);
+- badspawn fix ([i]2185 168 -32 Ilshenar TreasureChestLevel4[/i]);
+- GMbody command updated (Etherealhorse removed, now just use [speedboost);
+- bug fix: sea creatures won't spawn all at same point;
+- Ilshenar maps revised (100% now. 197 spawners removed);
+
+[b]Changes 5.0.1:[/b]
+- badspawns fixed;
+- bug fix: now Smart P.R.S. is disable for Vendors in towns;
+- more Ilshenar maps revised (53 spawners removed);
+
+[b]Changes 5.0.0:[/b]
+- updated to RunUO 2.0;
+- ML: Minotaur, Troglodyte, Grobu and Lurg changed;
+- PremiumSpawner engine updated: "fake spawner" added;
+- SpawnGen engine updated;
+- Minor gumps changes;
+- Old maps revised (Trammel, Felucca, and some Ilshenar maps);
+- Tutorial revised;

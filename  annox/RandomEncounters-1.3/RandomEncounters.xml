@@ -1,0 +1,657 @@
+<!-- ======================================================================
+This is a sample file, mainly the file I test the baseline system with;
+if your are starting with this as a baseline for your own set of actual
+encounters, be advised that you need to change the interval and cleanup
+numbers to something bigger. The time is in seconds; I would recommend
+something like 500 or more for each. If you use numbers that are too small,
+your players will be "swamped with encounters". The result depends on both
+probability and timing together, and needs to be tuned by you; this will
+requires some planning on your behalf. GOOD LUCK.
+
+"RandomEncounters" tag. This supports the following attributes and defaults:
+
+    * picker = the picking method, defaults to "sqrt". You may want "all" instead.
+    * language = the globalization code, defaults to "en-US".
+    * skiphidden = tells the system to exclude hidden players from encounters, defaults to true
+    * delay = amount of secs before encounters begin after server start, defaults to "60"
+    * interval = frequency in secs encounters are checked, defaults to "1800". This field can be separated into as many as 3 values, one each for dungeons, wilderness, and guarded regions. Separate with ":"
+    * cleanup = how long to wait before shutting down spawned mobiles, defaults to "300"
+    * cleanupGrace = how many times the system will fail to cleanup items if players are in range of them;
+                    "0" means never cleanup if player in range
+    * debug ="false" (print out extra debugging information)
+    * debugEffect ="false" (display an energy vortex on all spawns)
+    * RFTM defaults to true. Setting RTFM="true" (or deleting the tag) indicates that you've
+           at least made it this far and read some of the instructions.
+
+"Facet" tag.
+
+    * name = (mandatory tag naming the facet)
+
+"Region" tag.
+
+    * type = (mandatory tag specifying region type; can be "Guarded", "Dungeon", and "Wilderness")
+    * name =(mandatory tag naming the region; use "default" to pick up generic)
+
+"Encounter" tag.
+
+    * p = probability of encounter, default of "1.0", which means 100%. If p is set to * (e.g., p="*"), the encounter will always be had in addition to any other encounter the player might have for the region
+    * distance = the preferred distance from the player for the encounter, a number or a range (example "1" or "0:2" or "1:3"). Default is "7".
+    * water (DEPRECATED) = water mobiles can't spawn without this; land mobiles can't spawn with it, default is "false" (DEPRECATED... use landType="Water" instead please)
+    * landType= Water, OnRoad, OffRoad, or AnyLand. Default is "AnyLand".
+    * time=Night, Twilight, Day, or AnyTime. Default is "AnyTime".
+    * level=notional level of the character required to have the encounter; defaults to 1. An optional second argument can be sent to the level indicating class after a separating colon. E.g., "8:Necromancer". Valid current class names are Fighter, Ranger, Mage, Necromancer, Thief, and Overall.
+    * scaleUp=true/false, whether or not to scale up encounters that are waker than the player; defaults to false. Never more than triples an encounter.
+
+"Mobile" tag.
+
+    * p = probability of the mobile being included in a picked encounter, default is "1.0"
+    * pick = (a comma-separated list of mobiles to pick from (NO SPACES!); one is picked randomly)
+    * n = a number or a range (example "1" or "0:2" or "1:3"), default is "1"
+    * effect=Smoke, Fire, Vortex, Swirld, Glow. (default is None). Option :tag in the string indicates HUE.
+    * forceAttack = true|false (default false) Causes the tagged mob to attack the player upon spawn
+
+-->
+
+<RandomEncounters
+    picker="all"
+    skiphidden="true"
+    delay="60.0"
+    interval="1000.0:1000.0:100.0"
+    cleanup="300.0"
+    cleanupGrace="5"
+    debug="false"
+    debugEffect="true"
+    RTFM="true"
+    >
+
+	<Facet name="Felucca">
+		<Region name="default" type="Dungeon">
+			<Encounter p="0.25" distance="3:11">
+				<Mobile pick="DungeonBarrel" n="1:3" effect="Smoke"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Mobile pick="DungeonContainer" n="1:3" effect="Smoke"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Item pick="Bal,CharRune,Agle,Pas,Sar,Um" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Item pick="An,Bet,Corp,Des,Ex,Flam,Grav" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Item pick="Hur,In,Jux,Kal,Lor,Mani,Nox" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Item pick="Ort,Por,Quas,Rel,Sanct,Tym,Uus" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.25" distance="3:11">
+				<Item pick="Vas,Wis,Xen,Ylem,Zu" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="RuneMagicBook,RunicCastingBag,FullRunicCastingBag" n="1:3"/>
+			</Encounter>
+
+		</Region>
+		<Region name="default" type="Guarded">
+			<Encounter p="0.25" distance="3:11">
+				<Mobile pick="AG_SwampPatchAddon" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Mobile pick="Ferret" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Mobile pick="DiggingFerret" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Mobile pick="Squirrel" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Mobile pick="DungeonBarrel" n="1:3" effect="Smoke"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Mobile pick="DungeonContainer" n="1:3" effect="Smoke"/>
+			</Encounter>
+			<Encounter p="0.15" landtype="OnRoad" time="Day" distance="3:11">
+				<Mobile pick="HireBard,HireBardArcher,HireBeggar,HireFighter,HireMage,HirePaladin,HirePeasant,HireRanger,HireRangerArcher,HireSailor,HireThief" n="1" effect="Glow"/>
+			</Encounter>
+			<Encounter p="0.15" landtype="OnRoad" time="Day" distance="3:11">
+				<Mobile pick="EscortableMage,SeekerOfAdventure,Peasant,Noble,Messenger,BrideGroom" n="1" effect="Glow"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="Bal,CharRune,Agle,Pas,Sar,Um" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="An,Bet,Corp,Des,Ex,Flam,Grav" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="Hur,In,Jux,Kal,Lor,Mani,Nox" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="Ort,Por,Quas,Rel,Sanct,Tym,Uus" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="Vas,Wis,Xen,Ylem,Zu" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="3:11">
+				<Item pick="RuneMagicBook,RunicCastingBag,FullRunicCastingBag" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.20" distance="3:11">
+				<Item pick="ParchmentMessage" n="1:1"/>
+			</Encounter>
+		</Region>
+		<Region name="default" type="Wilderness">
+			<Encounter p="0.25" distance="3:11">
+				<Mobile pick="AG_SwampPatchAddon" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" landtype="OnRoad" time="Day" distance="3:11">
+				<Mobile pick="Alchemist,Herbalist,Mage" n="1"/>
+			</Encounter>
+			<Encounter p="0.10" landtype="OnRoad" time="Day" distance="3:11">
+				<Mobile pick="Armorer,Blacksmith,Bowyer,Weaponsmith" n="1"/>
+			</Encounter>
+			<Encounter p="0.10" landtype="OnRoad" time="Day" distance="3:11">
+				<Mobile pick="Furtrader,Provisioner,Tinker,Jeweler" n="1"/>
+			</Encounter>
+			<Encounter p="0.10" landtype="OffRoad" distance="3:11">
+				<Item pick="EvilHealer,WanderingHealer,PricedHealer" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" time="Day" distance="3:11">
+				<Item pick="BlackPearl,Bloodmoss,DeadWood,Garlic,Ginseng" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" time="Twilight" distance="3:11">
+				<Item pick="BlackPearl,Bloodmoss,MandrakeRoot,Nightshade" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" distance="7:15">
+				<Mobile pick="GiantSpider" n="1:3"/>
+				<Item pick="SpidersSilk" n="1:3"/>
+			</Encounter>
+			<Encounter p="0.10" time="Night" distance="3:11">
+				<Item pick="BatWing,DaemonBlood,DaemonBone,DeadWood,GraveDust,NoxCrystal,PigIron,SulfurousAsh" n="1:3"/>
+			</Encounter>
+		</Region>
+	</Facet>
+	<!-- ====================================================================== -->
+	<!-- <RandomEncounters skiphidden="true" delay="60.0" interval="60.0:60.0:60.0" cleanup="120.0" debug="true"> -->
+	<!-- An Nox's Dungeon of Doom                 -->
+	<!-- by RavonTUS                              -->
+	<!-- Play at An Nox the cure for UO addiction -->
+	<!-- http://annox.no-ip.com                   -->
+	<Facet name="Malas">
+		<!--************************************************************WILDERNESS Region-->
+		<Region type="Wilderness" name="default" >
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<Encounter p=".2" distance="5:14" landType="OffRoad">
+				<Mobile n="1:1" pick="Healer"/>
+			</Encounter>
+			<Encounter p=".1" distance="5:14" landType="OffRoad">
+				<Mobile n="1:1" pick="BankerCamp,HealerCamp,MageCamp,OrcCamp,RatCamp"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<!--************************************************************WILDERNESS Roads-->
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<Encounter p=".5" distance="7:14" time="Night" landType="OnRoad">
+				<Mobile n="3:5" pick="HireThief,HireSailor,HireRangerArcher,HireRanger,HirePeasant,HirePaladin,HireMage,HireFighter,HireBeggar,HireBardArcher,HireBard" />
+			</Encounter>
+			<Encounter p=".5" distance="7:14" time="Day" landType="OnRoad">
+				<Mobile n="3:5" pick="ArmorsSamurai,ClothSeller,ClothSellerStuff,NinjaDealer,Peddler,WeaponsSamurai" />
+			</Encounter>
+			<Encounter p=".5" distance="7:14" time="Twilight" landType="OnRoad">
+				<Mobile n="3:5" pick="TokunoAlchemist,TokunoArchitect,TokunoBanker,TokunoBard,TokunoHealer,TokunoHerbalist,TokunoInnKeeper,TokunoJeweler,TokunoMage,TokunoMapmaker,TokunoProvisioner,TokunoScribe,TokunoTailor,TokunoTavernkeeper,TokunoTinker" />
+			</Encounter>
+			<Encounter p=".5" distance="5:14" landType="OnRoad" >
+				<Mobile n="1:1" pick="SeekerOfAdventure,BaseEscortable,EscortableMage"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<!--************************************************************Cave Road-->
+		<Region type="Guarded" name="Cave Road">
+			<!-- Decorum -->
+			<Encounter p="*" distance="2:15">
+				<Item n="2:5" pick="BoneShards,RibCage,Spine,PelvisBone"/>
+			</Encounter>
+			<Encounter p="*" distance="2:15">
+				<Item n="2:5" pick="BonePile1,BonePile2,BonePile3,BonePile4,BonePile5"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="1" distance="2:5">
+				<Mobile n="5:10" pick="WildBird,WildTropicalBird"/>
+				<Item n="2:4" pick="Eggs,EggShells"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<!--************************************************************Forts -->
+		<Region type="Guarded" name="Fort Strat">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Fort Goldclaw">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Fort Kedalcaster">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Fort Loamsdown">
+			<!-- Decorum -->
+			<Encounter p="*" distance="4:14">
+				<Item n="5:10"  pick="Brain,Entrails,Torso,Head,LeftArm,RightArm,LeftLeg,RightLeg,Blood"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<Encounter p="*" distance="7:14">
+				<Mobile n="3:6" pick="Lizardman"/>
+			</Encounter>
+			<Encounter p=".5" distance="7:14">
+				<Mobile pick="EarthElemental,AirElemental,BloodElemental,FireElemental,PoisonElemental,ToxicElemental"/>
+				<Mobile n="3:6" pick="Lizardman"/>
+				<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+					<Item pick="BladedStaff,DoubleBladedStaff,Pike,Pitchfork,ShortSpear,Spear,TribalSpear,WarFork"/>
+				</Item>
+			</Encounter>
+			<!-- Treasure -->
+			<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+				<Item n="5:10" pick="BatWing,BlackPearl,Bloodmoss,DaemonBlood,DaemonBone,Garlic,Ginseng,GraveDust,MandrakeRoot,Nightshade,NoxCrystal,PigIron,SpidersSilk,SulfurousAsh"/>
+			</Item>
+		</Region>
+		<!--************************************************************Forest -->
+		<Region type="Guarded" name="Dark Forest">
+			<!-- Decorum -->
+			<Encounter p="*" distance="4:15">
+				<Item n="5:10" pick="AppleTreeNL,GoldenWillowTreeNL,WillowTreeNL,WalnutTreeNL,GreyNoFoilage,WarmBrownTreeNL,OakTreeNLWide,OakTreeNL"/>
+				<Item n="5:10" pick="CedarTree,CypressTree,OakTree,OhiiTree,SaplingTree,SmallPalmTree,SpiderTree,TreeLeaves,TreeStump,TuscanyPineTree,WalnutTree,WillowTree,YuccaTree,YewTreeAddon"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p=".5" distance="7:14">
+				<Mobile n="1:3" pick="Pixie,ShadowWisp,Wisp,"/>
+			</Encounter>
+			<Encounter p=".5" distance="7:14">
+				<Mobile n="1:3" pick="EtherealWarrior,Centaur,"/>
+			</Encounter>
+			<Encounter p=".5" distance="7:14">
+				<Mobile n="1:3" pick="BlackBear,BrownBear,GrizzlyBear,DireWolf,FrenziedOstard"/>
+			</Encounter>
+			<Encounter p=".1" distance="7:14">
+				<Mobile n="1:3" pick="FrenziedOstard,ForestOstard,SilverSteed,Unicorn,SwampDragon"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<!--************************************************************Mountains -->
+		<Region type="Guarded" name="Hawksvale">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Ossicmouth">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Silvertol">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<Encounter p=".1" distance="5:14">
+				<Mobile n="1:3" pick="AgapiteElemental,BronzeElemental,CopperElemental,DullCopperElemental,GoldenElemental,ShadowIronElemental,ValoriteElemental,VeriteElemental" />
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<Encounter p=".1" distance="7:14">
+				<Mobile n="3:5" pick="IronOre,DullCopperOre,ShadowIronOre,CopperOre,BronzeOre,GoldOre,AgapiteOre,VeriteOre,ValoriteOre,BlazeOre,IceOre,ToxicOre,ElectrumOre,PlatinumOre" />
+			</Encounter>
+		</Region>
+		<Region type="Guarded" name="Ashclaw">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<Encounter p="*" distance="7:14">
+				<Mobile n="1:3" pick="ExodusMinion,ExodusOverseer,Juggernaut,BladeSpirits"/>
+			</Encounter>
+			<Encounter p="1" distance="7:14">
+				<Mobile n="3:6" pick="ExodusMinion,ExodusOverseer,Juggernaut,BladeSpirits"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<Encounter p=".7" distance="5:14">
+				<Mobile n="1:3" pick="FurBoots,FurCape,FurSarong,ArcticDeathDealer" />
+			</Encounter>
+			<Encounter p=".7" distance="5:14">
+				<Mobile n="1:3" pick="Beads,GoldBeadNecklace,GoldBracelet,GoldEarrings,GoldNecklace,GoldRing,Necklace,SilverBeadNecklace,SilverBracelete,SilverEarrings,SilverNecklace,SilverRing" />
+			</Encounter>
+
+		</Region>
+		<Region type="Guarded" name="Lanmouth">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Bishops Icepoint">
+			<!-- Decorum -->
+			<Encounter p="*" distance="2:15">
+				<Item n="5:10" pick="WhiteFlowersLeft,WhiteFlowersLeft,WhitePoppies,Snowdrops"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="1" distance="7:14">
+				<Mobile n="3:6" pick="IceSerpent,IceSnake,IceOreElemental,IceHound,GiantIceWorm,IceElemental,IceFiend"/>
+			</Encounter>
+			<Encounter p="1" distance="7:14">
+				<Mobile n="3:6" pick="SnowLeopard,LadyoftheSnow,SnowElemental,Raiju"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Hollowmountain">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Windgrove">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Snow Cresent">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Bymountain">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Snow Dragon">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="Wednesmountain">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Guarded" name="The Point">
+			<!-- Decorum -->
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<!--************************************************************DUGEON REGION -->
+		<!--************************************************************Doom -->
+		<Region type="Dungeon" name="Doom">
+			<!-- Decorum -->
+			<Encounter p="*" distance="2:15">
+				<Item n="5:10" pick="BrazierTall,Brazier,Torch,Candle,CandleLarge,CandleShort,CandleSkull"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Store Room">
+			<!-- Decorum -->
+			<Encounter p="*" distance="4:14">
+				<Item n="3:10" pick="BrazierTall,Brazier,Torch"/>
+			</Encounter>
+			<Encounter p="*" distance="4:14">
+				<Item n="1:5"  pick="Brain,Entrails,Torso,Head,LeftArm,RightArm,LeftLeg,RightLeg,Blood"/>
+			</Encounter>
+			<Encounter p="*" distance="4:14">
+				<Item n="1:5"  pick="PelvisBone,RibCage,Spine,Blood"/>
+			</Encounter>
+			<Encounter p="1" distance="7:14">
+				<Item n="3:10" pick="Apple,Bacon,BreadLoaf,FrenchBread,MeatPie,CheeseWedge,CheeseWheel"/>
+			</Encounter>
+			<Encounter p=".75" distance="4:14">
+				<Item n="1:5" pick="WoodenTreasureChest,MetalGoldenTreauseChest,MetalTreauseChest,TreasureChestLevel1,TreasureChestLevel2,TreasureChestLevel3,TreasureChestLevel4"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p=".50" distance="7:14">
+				<Mobile n="1:3" pick="Slime,Rat,Bat"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<Encounter p="1" distance="7:14">
+				<Item n="3:9" pick="DungeonBarrel"/>
+			</Encounter>
+		</Region>
+		<Region type="Dungeon" name="Doom Exit">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="3:5"  pick="BrazierTall,Brazier"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="Torso,Head,LeftArm,RightArm,LeftLeg,RightLeg,Blood"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="1:5"  pick="PelvisBone,RibCage,Spine,Blood"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<Encounter p=".25" distance="7:14">
+				<Item n="1:3" pick="DungeonBarrel"/>
+			</Encounter>
+		</Region>
+		<Region type="Dungeon" name="Doom Orc Pit">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="Campfire,Torch"/>
+				<Item n="5:10" pick="WoodDebris,BedRoll,Kindling"/>
+			</Encounter>
+			<Encounter p=".50" distance="7:14">
+				<Item n="1" pick="OrcCamp"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<Encounter p=".90" distance="7:14">
+				<Mobile n="1" pick="Orc,OrcishMage,OrcBomber,OrcBrute,OrcCaptain,OrcishLord">
+					<Mobile n="1:3" pick="Orc"/>
+					<Mobile p=".50" pick="OrcishMage"/>
+					<Mobile p=".50" pick="OrcBomber"/>
+					<Mobile p=".50" pick="OrcBrute"/>
+					<Mobile p=".50" pick="OrcCaptain"/>
+					<Mobile p=".50" pick="OrcishLord"/>
+				</Mobile>
+				<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+					<Item n="1:3" pick="RingmailArms,RingmailChest,RingmailGloves,RingmailLegs,WarHammer"/>
+					<Item p=".5" pick="OrcishVisage,OrcHelm,FireHorn"/>
+				</Item>
+				<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+					<Item n="1:5"  pick="AgilityScroll,AngelicFaithScroll,AnimateDeadScroll,ArchcureScroll,ArchProtectionScroll,ArmageddonScroll,ArmysPaeonScroll,AwakenAllScroll,AwakenScroll,BanishEvilScroll,BladeSpiritsScroll,BlankScroll,BlendWithForestScroll,BlessScroll,BloodOathScroll,BloodPactScroll,CauseFearScroll,ChainLightningScroll,CharmScroll,CloneScroll,ClumsyScroll,CorpseSkinScroll,CreateFoodScroll,CunningScroll,CurePoisonScroll,CureScroll,CurseScroll,CurseWeaponScroll,DampenSpiritScroll,"/>
+					<Item n="1:5"  pick="DeathVortexScroll,DestroyTrapScroll,DetectTrapScroll,DispelFieldScroll,DispelScroll,DivineFocusScroll,DouseScroll,DruidFamiliarScroll,EarthquakeScroll,EnchantedGroveScroll,EnchantingEtudeScroll,EnchantSpellScroll,EnergyBoltScroll,EnergyCarolScroll,EnergyFieldScroll,EnergyThrenodyScroll,EnergyVortexScroll,EvilOmenScroll,ExorcismScroll,ExplosionScroll,FakeGoldSpellScroll,FeeblemindScroll,FireballScroll,RangerFireBowScroll,FireCarolScroll,FireFieldScroll,FireRingScroll,"/>
+					<Item n="1:5"  pick="FireThrenodyScroll,FireworksScroll,FlamestrikeScroll,FlightOfThePheonixScroll,FoeRequiemScroll,GateTravelScroll,GlimmerScroll,GraspingRootsScroll,GraveyardGatewayScroll,GreatDouseScroll,GreaterHealScroll,GreatIgniteScroll,GreatLightScroll,HammerOfFaithScroll,HarmScroll,HealScroll,HeavenlyLightScroll,HeavensGateScroll,HollowReedScroll,HordeMinionsEyesScroll,HorrificBeastScroll,HuntersAimScroll,IceBowScroll,IceCarolScroll,IceThrenodyScroll,IgniteScroll,IncognitoScroll,"/>
+					<Item n="1:5"  pick="IntimidationScroll,InvisibilityAllScroll,InvisibilityScroll,KnightsMinneScroll,KronusScroll,KronusScrollBox,LeafWhirlwindScroll,LichFormScroll,LightningBowScroll,LightningScroll,LocateScroll,LureStoneScroll,MagesBalladScroll,MagicArrowScroll,MagicFinaleScroll,MagicLockScroll,MagicReflectScroll,MagicTrapScroll,MagicUnTrapScroll,ManaDrainScroll,ManaVampireScroll,MarkOfGodsScroll,MarkScroll,MassCharmScroll,MassCurseScroll,MassDeathScroll,MassDispelScroll,MassMightScroll,"/>
+					<Item n="1:5"  pick="MassSleepScroll,MeteorStormScroll,MindBlastScroll,MindRotScroll,MisfitsOfMondainScroll,MushroomGatewayScroll,NaturalHerbScroll,NaturesPassageScroll,NecroMassCurseScroll,NecroPoisonFieldScroll,NecroPoisonScroll,NightSightScroll,NoxBowScroll,PackOfBeastScroll,PainSpikeScroll,ParalyzeScroll,PeerScroll,PoisonCarolScroll,PoisonFieldScroll,PoisonIvyPatchScroll,PoisonMarkScroll,PoisonScroll,PoisonStrikeScroll,PoisonThrenodyScroll,PolymorphScroll,PowerScroll,PowerScrollDeed,"/>
+					<Item n="1:5"  pick="ProtectionScroll,PurgeScroll,RangerFamiliarScroll,ReactiveArmorScroll,RecallScroll,RestorationScroll,RestorativeSoilScroll,ResurrectionScroll,RevealScroll,RevivalBySeanceScroll,RogueCharmScroll,RogueFalseCoinScroll,SacredBoonScroll,SacrificeScroll,SchmendrickScrollOfPower,ScrollOfAbraxus,SeanceScroll,ShadowScroll,SheepfoeMamboScroll,ShieldOfEarthScroll,SinewyEtudeScroll,SleepFieldScroll,SleepScroll,SlyFoxScroll,SmiteScroll,SpellScroll,SpringOfLifeScroll,StatScroll,"/>
+					<Item n="1:5"  pick="StoneCircleScroll,StrangleScroll,StrengthScroll,SummonAirElementalScroll,SummonCreatureScroll,SummonDaemonScroll,SummonEarthElementalScroll,SummonFamiliarScroll,SummonFireElementalScroll,SummonMountScroll,SummonWaterElementalScroll,SwarmOfInsectsScroll,SwarmScroll,TelekinisisScroll,TeleportScroll,ThunderScroll,TouchOfLifeScroll,TravelByPoisonScroll,TremorScroll,TrialByFireScroll,UnlockScroll,VampiricEmbraceScroll,VengefulSpiritScroll,VolcanicEruptionScroll,"/>
+					<Item n="1:5"  pick="WallOfSpikesScroll,WallOfStoneScroll,WeakenScroll,WeatherScroll,WitherScroll,WraithFormScroll"/>
+				</Item>
+			</Encounter>
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Mad Wizzards Lair">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="1:10" pick="BrazierTall,Brazier"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Hall of Valor">
+			<!-- Decorum -->
+			<Encounter p=".1" distance="7:14">
+				<Item n="5:10" pick="BrazierTall,Brazier"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Smugglers Retreat">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="LampPost1,CandleLarge,CandleSkull"/>
+			</Encounter>
+			<Encounter p=".50" distance="7:14">
+				<Item n="1" pick="BankerCamp"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="1" distance="7:14">
+				<Mobile n="3:6" pick="Alchemist,AnimalTrainer,Architect,Armorer,Baker,Bard,Barkeeper,Beekeeper,Blacksmith,Bowyer,Butcher,Carpenter,Cobbler,Cook,CustomHairstylist,Farmer,Fisherman,Furtrader,Glassblower,GolemCrafter,GypsyAnimalTrainer,GypsyBanker,GypsyMaiden,HairStylist,Herbalist,HolyMage,InnKeeper,IronWorker,Jeweler,KeeperOfChivalry,LeatherWorker,Mage,Mapmaker,Miner,Provisioner,Rancher,Ranger,RealEstateBroker,Scribe,Shipwright,StoneCrafter,Tailor,Tanner,TavernKeeper,Thief,Tinker,Vagabond,VarietyDealer,Veterinarian,Waiter,Weaponsmith,Weaver"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Torbriand Graveyard">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="CandleSkull"/>
+			</Encounter>
+			<Encounter p="*" distance="2:14">
+				<Item n="5:10"  pick="Brain,Entrails,Torso,Head,LeftArm,RightArm,LeftLeg,RightLeg,Blood"/>
+			</Encounter>
+			<Encounter p="*" distance="2:14">
+				<Item n="5:10"  pick="PelvisBone,RibCage,Spine,Blood"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="*" distance="7:14" scaleUp="true" level="7">
+				<Mobile n="3:6" pick="DemonKnight,BoneDemon,BoneMagi"/>
+			</Encounter>
+			<!-- Mobs -->
+			<Encounter p="1" distance="7:14">
+				<Mobile n="1"  pick="Skeleton,PatchworkSkeleton,SkeletalKnight,SkeletalMage">
+					<Mobile n="1:3" pick="Skeleton"/>
+					<Mobile p=".1" pick="PatchworkSkeleton"/>
+					<Mobile p=".1" pick="SkeletalKnight"/>
+					<Mobile p=".1" pick="SkeletalMage"/>
+				</Mobile>
+				<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+					<Item pick="AdmiralsHeartyRum,AlchemistsBauble,ArcticDeathDealer,BlazeOfDeath,BowOfTheJukaKing,BurglarsBandana,CandleabraOfSouls,CaptainQuacklebushsCutlass,CavortingClub,ColdBlood,DreadPirateHat,EnchantedTitanLegBone,GhostShipAnchor,GlovesOfThePugilist,GoldBricks,GwennosHarp,HeartOfTheLion,IolosLute,LunaLance,NightsKiss,NoxRangersHeavyCrossbow,OrcishVisage,PhillipsWoodenSteed,PixieSwatter,PolarBearMask,SeahorseStatuette,ShieldOfInvulnerability,ShipModelOfTheHMSCape,StaffOfPower,VioletCourage,WrathOfTheDryad"/>
+				</Item>
+			</Encounter>
+			<Encounter p=".9" distance="7:14">
+				<Mobile n="1" pick="Zombie,RottingCorpse,RestlessSoul,Mummy,Bogle,Shade,Spectre,Wraith,Ghoul,RestlessSoul,RottingCorpse,SpectralArmour"/>
+			</Encounter>
+			<Encounter p=".8" distance="7:14">
+				<Mobile n="1"  pick="Skeleton,PatchworkSkeleton,SkeletalKnight,SkeletalMage">
+					<Mobile n="1:3" pick="Skeleton"/>
+					<Mobile p=".1" pick="PatchworkSkeleton"/>
+					<Mobile p=".1" pick="SkeletalKnight"/>
+					<Mobile p=".1" pick="SkeletalMage"/>
+				</Mobile>
+			</Encounter>
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Aura of Healing">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="Candle,CandleLarge,CandleShort"/>
+				<Item n="5:10" pick="Bandage,Blood,AnkhWest,ElegantLowTable,FancyWoodenChairCushion"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="1" distance="7:14">
+				<Mobile n="2:4" pick="Healer,TukunoHealer,EvilHealer,EvilWanderingHealer,WanderingHealer,PricedHealer,FortuneTeller"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Fire Stone">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="BrazierTall,Brazier,CandleSkull"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="10:20" pick="FireColumnTrap"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10"  pick="Brain,Entrails,Torso,Head,LeftArm,RightArm,LeftLeg,RightLeg,Blood"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10"  pick="RibCage,Spine,Blood"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<Encounter p=".50" distance="7:14">
+				<Mobile n="1"  pick="FireGargoyle,BoneDaemon,BoneKnight,BoneMagi">
+					<Mobile p=".1" pick="BoneDaemon"/>
+					<Mobile p=".1" pick="BoneKnight"/>
+					<Mobile p=".1" pick="BoneMagi"/>
+				</Mobile>
+				<Item pick="WoodenChest,MetalChest,Pouch,SmallBagBall,Bag,Barrel,PicnicBasket,Basket,WoodenBox,SmallCrate,MediumCrate,LargeCrate,MetalBox,MetalChest,MetalGoldenChest,WoodenChest,PlainWoodenChest,OrnateWoodenChest,GildedWoodenChest,WoodenFootLocker,FinishedWoodenChest">
+					<Item pick="ArmorOfFortune,GauntletsOfNobility,HelmOfInsight,HolyKnightsBreastplate,InquisitorsResolution,JackalsCollar,LeggingsOfBane,idnightBracers,OrnateCrownOfTheHarrower,ShadowDancerLeggings,TunicOfFire,VoiceOfTheFallenKing"/>
+				</Item>
+			</Encounter>
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Spiders Dream">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="BrazierTall,Brazier"/>
+			</Encounter>
+			<Encounter p="*" distance="7:14">
+				<Item n="5:10" pick="SmallWebEast,SmallWebWest,SmallWebSouth,SmallWebNorth,SmallWebLeft,SmallWebRight,EggCaseWeb,Cocoon,SmallWebHole"/>
+			</Encounter>
+			<Encounter p="*" distance="2:15">
+				<Item n="5:10" pick="BoneShards,RibCage,Spine,PelvisBone"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p=".50" distance="7:20">
+				<Mobile n="1:4" pick="GiantSpider,GiantBlackWidow,DreadSpider,Mephitis"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<Region type="Dungeon" name="Doom Guardgoyle Pit">
+			<!-- Decorum -->
+			<Encounter p="*" distance="7:14">
+				<Item n="1:10" pick="BrazierTall,Brazier"/>
+			</Encounter>
+			<!-- Creatures -->
+			<!-- Mobs -->
+			<!-- Treasure -->
+		</Region>
+		<!--******************************************************************North Pole-->
+		<Region type="Guarded" name="NorthPole">
+			<!-- Decorum -->
+			<Encounter p="*" distance="4:15">
+				<Item n="5:10" pick="RedPoinsettia,WhitePoinsettia,Snowman,WhiteSnowFlake,BlueSnowFlake,DecorativeTopiary,SnowyTree"/>
+			</Encounter>
+			<Encounter p="1" distance="4:15">
+				<Item n="5:10" pick="LightOfTheWinterSolstice"/>
+			</Encounter>
+			<Encounter p="1" distance="4:15">
+				<Item n="5" pick="PileOFGlacialSnow,SnowPile"/>
+			</Encounter>
+			<!-- Creatures -->
+			<Encounter p="1" distance="7:15">
+				<Mobile n="1" pick="Dasher,Dancer,Prancer,Vixen,Comet,Cupid,Donner,Blitzen,Rudolph"/>
+			</Encounter>
+			<!-- Mobs -->
+			<!-- Treasure -->
+			<Encounter p=".25" distance="4:15">
+				<Item n="1:3" pick="WreathDeed,GiftBox,WinterGiftPackage2003,MistleToeDeed"/>
+			</Encounter>
+		</Region>
+	</Facet>
+</RandomEncounters>

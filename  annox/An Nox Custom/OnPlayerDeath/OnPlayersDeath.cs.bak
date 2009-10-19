@@ -1,0 +1,127 @@
+//11APR2008 OnPlayersDeath written by RavonTUS
+//
+//   /\\           |\\  ||
+//  /__\\  |\\ ||  | \\ ||  /\\  \ //
+// /    \\ | \\||  |  \\||  \//  / \\ 
+// Play at An Nox, the cure for the UO addiction
+// http://annox.no-ip.com  // RavonTUS@Yahoo.com
+
+using System;
+using System.Collections;
+using System.IO;
+using System.Text;
+using Server;
+using Server.Accounting;
+using Server.Items;
+using Server.Mobiles;
+using Server.Network;
+using Server.Regions;
+
+
+namespace Server.Items
+{
+    public class OnPlayersDeath : Item
+    {
+        private const bool m_Enabled = true;  //Turn system on (true) or off (flase)
+        private const string path = "C:/Inetpub/wwwroot/status/web/kills";  //path for HTML file to upload to your website  
+        
+        public static bool Enabled { get { return m_Enabled; } }
+
+        public static void Initialize()
+        {
+            if (Enabled)
+                EventSink.PlayerDeath += new PlayerDeathEventHandler(EventSink_PlayerDeath);
+        }
+
+        public static void EventSink_PlayerDeath(PlayerDeathEventArgs e)
+        {
+            Killed(e.Mobile);
+
+
+            Console.WriteLine("OnPlayersDeath: {0}", path);
+        }
+
+        public static void Killed(Mobile m) //done
+        {
+            PlayerMobile owner = m as PlayerMobile;
+
+            Mobile m_Killer = (Mobile)m.LastKiller;
+
+            Mobile from = (Mobile)m.LastKiller;
+
+            if (m_Killer != null && m_Killer.Player && owner != null && owner.Player)
+            {
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                if (!File.Exists(path + "/index.html"))
+                {
+                    using (StreamWriter op = new StreamWriter(path + "/index.html"))
+                    {
+                        op.WriteLine("<html>");
+                        op.WriteLine("   <head>");
+                        op.WriteLine("      <title>Book of Kills - updated by Ravon of An Nox</title>");
+                        op.WriteLine("   </head>");
+                        op.WriteLine("   <body bgcolor=\"black\">");
+                        op.WriteLine("      <a href='http://annox.no-ip.com'><img border='0' src='http://bp2.blogger.com/_CGKuPVAFxb0/Rg2-IKxjEdI/AAAAAAAAAGE/tyKWGQFaFic/s200/laugh.jpg' alt='http://annox.no-ip.com' /></a>");
+                        op.WriteLine("      <h1><font color='red'>The Book of Kills</font></h1>");
+                        op.WriteLine("      <font color='yellow'>{0}</font><font color='white'> has killed </font><font color='cyan'>{2}</font> ", Encode(m_Killer.Name), Encode(owner.Name));
+                        op.WriteLine("      <font color='white'>in </font><font color='gold'>{0}</font> ", m.Region.Name);
+                        op.WriteLine("      <font color='white'>(</font> <font color=\"khaki\">{0}, {1}, {2}</font>)<font color='white'>) in the land of {3}</font> ", from.X, from.Y, from.Z, from.Map);
+                        op.WriteLine("      <font color='white'>on </font><font color=\"red\">{0}.</font><br>", DateTime.Now);
+                        op.WriteLine("   </body>");
+                        op.WriteLine("</html>");
+                    }
+                }
+                else
+                {
+                    using (StreamWriter op = File.AppendText(path + "/index.html"))
+                    {
+                        op.WriteLine("<html>");
+                        op.WriteLine("   <body bgcolor=\"black\">");
+                        op.WriteLine("      <font color='yellow'>{0}</font><font color='white'> has killed </font><font color='cyan'>{2}</font> ", Encode(m_Killer.Name), Encode(owner.Name));
+                        op.WriteLine("      <font color='white'>in </font><font color='gold'>{0}</font> ", m.Region.Name);
+                        op.WriteLine("      <font color='white'>(</font> <font color=\"khaki\">{0}, {1}, {2}</font>)<font color='white'>) in the land of {3}</font> ", from.X, from.Y, from.Z, from.Map);
+                        op.WriteLine("      <font color='white'>on </font><font color=\"red\">{0}.</font><br>", DateTime.Now);
+                        op.WriteLine("   </body>");
+                        op.WriteLine("</html>");
+                    }
+                }
+            }
+        }
+
+        private static string Encode(string input)
+        {
+            StringBuilder sb = new StringBuilder(input);
+
+            sb.Replace("&", "&amp;");
+            sb.Replace("<", "&lt;");
+            sb.Replace(">", "&gt;");
+            sb.Replace("\"", "&quot;");
+            sb.Replace("'", "&apos;");
+
+            return sb.ToString();
+        }
+
+        public OnPlayersDeath(Serial serial)
+            : base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+
+            writer.Write((int)0); // version
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+
+            int version = reader.ReadInt();
+        }
+    }
+}

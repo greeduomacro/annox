@@ -1,0 +1,96 @@
+using System;
+using System.Collections;
+using Server.Items;
+using Server.Targeting;
+
+namespace Server.Mobiles
+{
+	[CorpseName( "a troglodyte corpse" )]
+	public class Troglodyte : BaseCreature
+	{
+		[Constructable]
+		public Troglodyte() : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )
+		{
+			Name = "a troglodyte";
+			Body = 267;
+			BaseSoundID = 1440;
+
+			SetStr( 455, 465 );
+			SetDex( 175, 185 );
+			SetInt( 160, 170 );
+
+			SetHits( 346, 356 );
+
+			SetDamage( 24, 30 );
+
+			SetDamageType( ResistanceType.Physical, 75 );
+			SetDamageType( ResistanceType.Cold, 25 );
+
+			SetResistance( ResistanceType.Physical, 45, 55 );
+			SetResistance( ResistanceType.Cold, 40, 50 );
+			SetResistance( ResistanceType.Poison, 45, 55 );
+			SetResistance( ResistanceType.Energy, 25, 30 );
+			SetResistance( ResistanceType.Fire, 35, 40 );
+
+			SetSkill( SkillName.MagicResist, 75.1, 80.0 );
+			SetSkill( SkillName.Tactics, 95.1, 100.0 );
+			SetSkill( SkillName.Wrestling, 95.1, 100.0 );
+
+			Fame = 7000;
+			Karma = -7000;
+
+			VirtualArmor = 50;
+
+			PackItem( new DoubleAxe() ); // TODO: Weapon??
+		}
+
+		public override void GenerateLoot()
+		{
+			AddLoot( LootPack.FilthyRich );
+			AddLoot( LootPack.Gems );
+		}
+		public override int GetAttackSound()
+		{
+			return 1441;
+		}
+
+		public override int GetAngerSound()
+		{
+			return 1442;
+		}
+
+		public override int GetDeathSound()
+		{
+			return 1438;
+		}
+
+		public override int GetHurtSound()
+		{
+			return 1439;
+		}
+
+		public override int GetIdleSound()
+		{
+			return 1440;
+		}
+
+		public override int Meat{ get{ return 2; } }
+		public override int TreasureMapLevel{ get{ return 1; } }
+
+		public Troglodyte( Serial serial ) : base( serial )
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 0 );
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+	}
+}

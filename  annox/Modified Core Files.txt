@@ -1,0 +1,44 @@
+@echo Renaming Scripts
+rename Scripts\Accounting\AccountHandler.cs *.distro
+rename Scripts\Items\Misc\PublicMoongate.cs *.distro
+rename Scripts\Items\Armor\BaseArmor.cs	*.distro
+rename Scripts\Items\Clothing\BaseClothing.cs *.distro
+rename Scripts\Items\Jewels\BaseJewel.cs *.distro
+rename Scripts\Items\Weapons\BaseWeapon.cs *.distro
+rename Scripts\Mobiles\Vendors\BaseVendor.cs *.distro
+rename Scripts\Engines\Plants\PlantItem.cs *.distro
+rename Scripts\Gumps\AdminGump.cs *.distro
+rename Scripts\Engines\Harvest\Core\HarvestSystem.cs *.distro
+rename Scripts\Misc\ClientVerification.cs *.distro
+rename Scripts\Misc\SkillCheck.cs *.distro
+rename Scripts\Misc\MapDefinitions.cs *.distro
+rename Scripts\Misc\ServerList.cs *.distro
+rename Scripts\Misc\WebStatus.cs *.distro
+rename Scripts\Mobiles\PlayerMobile.cs *.distro
+rename Scripts\Mobiles\Guards\ArcherGuard.cs *.distro
+rename Scripts\Mobiles\Guards\WarriorGuard.cs *.distro
+rename Scripts\Mobiles\Vendors\GenericBuy.cs *.distro
+rename Scripts\Mobiles\Vendors\GenericSell.cs *.distro
+rename Scripts\Mobiles\Vendors\NPC\Blacksmith.cs *.distro
+rename Scripts\Mobiles\Vendors\NPC\Tailor.cs *.distro
+rename Scripts\Mobiles\Vendors\NPC\Weaponsmith.cs *.distro
+rename Scripts\Mobiles\Vendors\NPC\Weaver.cs *.distro
+rename Scripts\Spells\Base\Spell.cs *.distro
+rename "Scripts\Items\Skill Items\Magical\Potions\BasePotion.cs" *.distro
+
+
+rename Scripts\Misc\AutoSave.cs *.server
+
+@echo Renaming Data
+rename Data\Regions.xml *.distro
+rename Data\TalkingNPCs.xml *.distro
+rename Data\RandomTOTD.xml *.distro
+rename Data\Assemblies.cfg *.distro
+
+rename Data\Books\bible.xml *.distro
+rename Data\Locations\felucca.xml *.distro
+rename Data\Locations\trammel.xml *.distro
+rename "Data\Decoration\Felucca\Teleporters - New Dungeons.cfg" *.distro
+rename "Data\Decoration\Trammel\Teleporters - New Dungeons.cfg" *.distro
+
+xcopy Scripts\Custom\Distro\Data\*.* Data\*.* /s
