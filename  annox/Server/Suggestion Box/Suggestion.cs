@@ -114,7 +114,7 @@ namespace Server.Gumps
                             op.WriteLine("      <title>Suggestion by Players - updated by Ravon of An Nox</title>");
                             op.WriteLine("   </head>");
                             op.WriteLine("   <body bgcolor=\"black\">");
-                            op.WriteLine("      <a href='http://annox.no-ip.com'><img src='http://annox.no-ip.com/forums/tp-images/Image/Medieval_Weaponry.jpg' alt='http://annox.no-ip.com' /></a>");
+                            op.WriteLine("      <a href='http://annox.no-ip.com'><img src='http://annox.no-ip.com/images/fire.jpg' alt='http://annox.no-ip.com' /></a>");
                             op.WriteLine("      <h1><font color=\"red\">Suggestion Box:</font></h1><br>");
                             op.WriteLine("      <font color='white'> Date: </font><font color='yellow'>{0}</font><br>", DateTime.Now);
                             op.WriteLine("      <font color='white'> Name of Character: </font><font color='yellow'>{0}</font><font color='white'>.  Account Name:  </font><font color='yellow'>{1}</font><font color='white'>.</font><br>", Encode(from.Name), Encode(acct.Username));
