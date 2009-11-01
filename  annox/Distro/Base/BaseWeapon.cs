@@ -1,5 +1,3 @@
-//19MAR2008 RP Flavoring to Weapon Displays
-//http://www.runuo.com/forums/custom-script-releases/88130-rp-flavoring-weapon-displays.html
 using System;
 using System.Text;
 using System.Collections;
@@ -99,7 +97,7 @@ namespace Server.Items
         private int m_StrReq, m_DexReq, m_IntReq;
         private int m_MinDamage, m_MaxDamage;
         private int m_HitSound, m_MissSound;
-        private int m_Speed;
+        private float m_Speed;
         private int m_MaxRange;
         private SkillName m_Skill;
         private WeaponType m_Type;
@@ -123,6 +121,7 @@ namespace Server.Items
         public virtual int AosMinDamage { get { return 0; } }
         public virtual int AosMaxDamage { get { return 0; } }
         public virtual int AosSpeed { get { return 0; } }
+        public virtual float MlSpeed { get { return 0.0f; } }
         public virtual int AosMaxRange { get { return DefMaxRange; } }
         public virtual int AosHitSound { get { return DefHitSound; } }
         public virtual int AosMissSound { get { return DefMissSound; } }
@@ -359,9 +358,20 @@ namespace Server.Items
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
-        public int Speed
+        public float Speed
         {
-            get { return (m_Speed == -1 ? Core.AOS ? AosSpeed : OldSpeed : m_Speed); }
+            get
+            {
+                if (m_Speed != -1)
+                    return m_Speed;
+
+                if (Core.ML)
+                    return MlSpeed;
+                else if (Core.AOS)
+                    return AosSpeed;
+
+                return m_Speed;
+            }
             set { m_Speed = value; InvalidateProperties(); }
         }
 
@@ -859,7 +869,7 @@ namespace Server.Items
 
         public virtual TimeSpan GetDelay(Mobile m)
         {
-            int speed = this.Speed;
+            double speed = this.Speed;
 
             if (speed == 0)
                 return TimeSpan.FromHours(1.0);
@@ -905,12 +915,24 @@ namespace Server.Items
                 if (bonus > 60)
                     bonus = 60;
 
-                speed = (int)Math.Floor(speed * (bonus + 100.0) / 100.0);
+                double ticks;
 
-                if (speed <= 0)
-                    speed = 1;
+                if (Core.ML)
+                {
+                    int stamTicks = m.Stam / 30;
 
-                int ticks = (int)Math.Floor((80000.0 / ((m.Stam + 100) * speed)) - 2);
+                    ticks = speed * 4;
+                    ticks = Math.Floor((ticks - stamTicks) * (100.0 / (100 + bonus)));
+                }
+                else
+                {
+                    speed = Math.Floor(speed * (bonus + 100.0) / 100.0);
+
+                    if (speed <= 0)
+                        speed = 1;
+
+                    ticks = Math.Floor((80000.0 / ((m.Stam + 100) * speed)) - 2);
+                }
 
                 // Swing speed currently capped at one swing every 1.25 seconds (5 ticks).
                 if (ticks < 5)
@@ -920,7 +942,7 @@ namespace Server.Items
             }
             else if (Core.AOS)
             {
-                int v = (m.Stam + 100) * speed;
+                int v = (m.Stam + 100) * (int)speed;
 
                 int bonus = AosAttributes.GetValue(m, AosAttribute.WeaponSpeed);
 
@@ -947,7 +969,7 @@ namespace Server.Items
             }
             else
             {
-                int v = (m.Stam + 100) * speed;
+                int v = (m.Stam + 100) * (int)speed;
 
                 if (v <= 0)
                     v = 1;
@@ -2415,7 +2437,7 @@ namespace Server.Items
         {
             base.Serialize(writer);
 
-            writer.Write((int)8); // version
+            writer.Write((int)9); // version
 
             SaveFlag flags = SaveFlag.None;
 
@@ -2505,7 +2527,7 @@ namespace Server.Items
                 writer.Write((int)m_MissSound);
 
             if (GetSaveFlag(flags, SaveFlag.Speed))
-                writer.Write((int)m_Speed);
+                writer.Write((float)m_Speed);
 
             if (GetSaveFlag(flags, SaveFlag.MaxRange))
                 writer.Write((int)m_MaxRange);
@@ -2586,6 +2608,7 @@ namespace Server.Items
 
             switch (version)
             {
+                case 9:
                 case 8:
                 case 7:
                 case 6:
@@ -2679,7 +2702,12 @@ namespace Server.Items
                             m_MissSound = -1;
 
                         if (GetSaveFlag(flags, SaveFlag.Speed))
-                            m_Speed = reader.ReadInt();
+                        {
+                            if (version < 9)
+                                m_Speed = reader.ReadInt();
+                            else
+                                m_Speed = reader.ReadFloat();
+                        }
                         else
                             m_Speed = -1;
 
@@ -3048,234 +3076,235 @@ namespace Server.Items
 
             return attrInfo.WeaponLuck;
         }
-
         //19MAR2008 RP Flavoring to Weapon Displays *** START ***
-        #region 19MAR2008 RP Flavoring to Weapon Display - OLD *** START ***
-        //public override void GetProperties( ObjectPropertyList list )
+        //public override void GetProperties(ObjectPropertyList list)
         //{
-        //    base.GetProperties( list );
+        //    base.GetProperties(list);
 
-        //    if ( m_Crafter != null )
-        //        list.Add( 1050043, m_Crafter.Name ); // crafted by ~1_NAME~
+        //    if (m_Crafter != null)
+        //        list.Add(1050043, m_Crafter.Name); // crafted by ~1_NAME~
 
         //    #region Factions
-        //    if ( m_FactionState != null )
-        //        list.Add( 1041350 ); // faction item
+        //    if (m_FactionState != null)
+        //        list.Add(1041350); // faction item
         //    #endregion
 
-        //    if ( m_AosSkillBonuses != null )
-        //        m_AosSkillBonuses.GetProperties( list );
+        //    if (m_AosSkillBonuses != null)
+        //        m_AosSkillBonuses.GetProperties(list);
 
-        //    if ( m_Quality == WeaponQuality.Exceptional )
-        //        list.Add( 1060636 ); // exceptional
+        //    if (m_Quality == WeaponQuality.Exceptional)
+        //        list.Add(1060636); // exceptional
 
-        //    if( RequiredRace == Race.Elf )
-        //        list.Add( 1075086 ); // Elves Only
+        //    if (RequiredRace == Race.Elf)
+        //        list.Add(1075086); // Elves Only
 
-        //    if ( ArtifactRarity > 0 )
-        //        list.Add( 1061078, ArtifactRarity.ToString() ); // artifact rarity ~1_val~
+        //    if (ArtifactRarity > 0)
+        //        list.Add(1061078, ArtifactRarity.ToString()); // artifact rarity ~1_val~
 
-        //    if ( this is IUsesRemaining && ((IUsesRemaining)this).ShowUsesRemaining )
-        //        list.Add( 1060584, ((IUsesRemaining)this).UsesRemaining.ToString() ); // uses remaining: ~1_val~
+        //    if (this is IUsesRemaining && ((IUsesRemaining)this).ShowUsesRemaining)
+        //        list.Add(1060584, ((IUsesRemaining)this).UsesRemaining.ToString()); // uses remaining: ~1_val~
 
-        //    if ( m_Poison != null && m_PoisonCharges > 0 )
-        //        list.Add( 1062412 + m_Poison.Level, m_PoisonCharges.ToString() );
+        //    if (m_Poison != null && m_PoisonCharges > 0)
+        //        list.Add(1062412 + m_Poison.Level, m_PoisonCharges.ToString());
 
-        //    if( m_Slayer != SlayerName.None )
+        //    if (m_Slayer != SlayerName.None)
         //    {
-        //        SlayerEntry entry = SlayerGroup.GetEntryByName( m_Slayer );
-        //        if( entry != null )
-        //            list.Add( entry.Title );
+        //        SlayerEntry entry = SlayerGroup.GetEntryByName(m_Slayer);
+        //        if (entry != null)
+        //            list.Add(entry.Title);
         //    }
 
-        //    if( m_Slayer2 != SlayerName.None )
+        //    if (m_Slayer2 != SlayerName.None)
         //    {
-        //        SlayerEntry entry = SlayerGroup.GetEntryByName( m_Slayer2 );
-        //        if( entry != null )
-        //            list.Add( entry.Title );
+        //        SlayerEntry entry = SlayerGroup.GetEntryByName(m_Slayer2);
+        //        if (entry != null)
+        //            list.Add(entry.Title);
         //    }
 
 
-        //    base.AddResistanceProperties( list );
+        //    base.AddResistanceProperties(list);
 
         //    int prop;
 
-        //    if ( (prop = m_AosWeaponAttributes.UseBestSkill) != 0 )
-        //        list.Add( 1060400 ); // use best weapon skill
+        //    if ((prop = m_AosWeaponAttributes.UseBestSkill) != 0)
+        //        list.Add(1060400); // use best weapon skill
 
-        //    if ( (prop = (GetDamageBonus() + m_AosAttributes.WeaponDamage)) != 0 )
-        //        list.Add( 1060401, prop.ToString() ); // damage increase ~1_val~%
+        //    if ((prop = (GetDamageBonus() + m_AosAttributes.WeaponDamage)) != 0)
+        //        list.Add(1060401, prop.ToString()); // damage increase ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.DefendChance) != 0 )
-        //        list.Add( 1060408, prop.ToString() ); // defense chance increase ~1_val~%
+        //    if ((prop = m_AosAttributes.DefendChance) != 0)
+        //        list.Add(1060408, prop.ToString()); // defense chance increase ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.EnhancePotions) != 0 )
-        //        list.Add( 1060411, prop.ToString() ); // enhance potions ~1_val~%
+        //    if ((prop = m_AosAttributes.EnhancePotions) != 0)
+        //        list.Add(1060411, prop.ToString()); // enhance potions ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.CastRecovery) != 0 )
-        //        list.Add( 1060412, prop.ToString() ); // faster cast recovery ~1_val~
+        //    if ((prop = m_AosAttributes.CastRecovery) != 0)
+        //        list.Add(1060412, prop.ToString()); // faster cast recovery ~1_val~
 
-        //    if ( (prop = m_AosAttributes.CastSpeed) != 0 )
-        //        list.Add( 1060413, prop.ToString() ); // faster casting ~1_val~
+        //    if ((prop = m_AosAttributes.CastSpeed) != 0)
+        //        list.Add(1060413, prop.ToString()); // faster casting ~1_val~
 
-        //    if ( (prop = (GetHitChanceBonus() + m_AosAttributes.AttackChance)) != 0 )
-        //        list.Add( 1060415, prop.ToString() ); // hit chance increase ~1_val~%
+        //    if ((prop = (GetHitChanceBonus() + m_AosAttributes.AttackChance)) != 0)
+        //        list.Add(1060415, prop.ToString()); // hit chance increase ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitColdArea) != 0 )
-        //        list.Add( 1060416, prop.ToString() ); // hit cold area ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitColdArea) != 0)
+        //        list.Add(1060416, prop.ToString()); // hit cold area ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitDispel) != 0 )
-        //        list.Add( 1060417, prop.ToString() ); // hit dispel ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitDispel) != 0)
+        //        list.Add(1060417, prop.ToString()); // hit dispel ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitEnergyArea) != 0 )
-        //        list.Add( 1060418, prop.ToString() ); // hit energy area ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitEnergyArea) != 0)
+        //        list.Add(1060418, prop.ToString()); // hit energy area ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitFireArea) != 0 )
-        //        list.Add( 1060419, prop.ToString() ); // hit fire area ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitFireArea) != 0)
+        //        list.Add(1060419, prop.ToString()); // hit fire area ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitFireball) != 0 )
-        //        list.Add( 1060420, prop.ToString() ); // hit fireball ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitFireball) != 0)
+        //        list.Add(1060420, prop.ToString()); // hit fireball ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitHarm) != 0 )
-        //        list.Add( 1060421, prop.ToString() ); // hit harm ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitHarm) != 0)
+        //        list.Add(1060421, prop.ToString()); // hit harm ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLeechHits) != 0 )
-        //        list.Add( 1060422, prop.ToString() ); // hit life leech ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLeechHits) != 0)
+        //        list.Add(1060422, prop.ToString()); // hit life leech ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLightning) != 0 )
-        //        list.Add( 1060423, prop.ToString() ); // hit lightning ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLightning) != 0)
+        //        list.Add(1060423, prop.ToString()); // hit lightning ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLowerAttack) != 0 )
-        //        list.Add( 1060424, prop.ToString() ); // hit lower attack ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLowerAttack) != 0)
+        //        list.Add(1060424, prop.ToString()); // hit lower attack ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLowerDefend) != 0 )
-        //        list.Add( 1060425, prop.ToString() ); // hit lower defense ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLowerDefend) != 0)
+        //        list.Add(1060425, prop.ToString()); // hit lower defense ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitMagicArrow) != 0 )
-        //        list.Add( 1060426, prop.ToString() ); // hit magic arrow ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitMagicArrow) != 0)
+        //        list.Add(1060426, prop.ToString()); // hit magic arrow ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLeechMana) != 0 )
-        //        list.Add( 1060427, prop.ToString() ); // hit mana leech ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLeechMana) != 0)
+        //        list.Add(1060427, prop.ToString()); // hit mana leech ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitPhysicalArea) != 0 )
-        //        list.Add( 1060428, prop.ToString() ); // hit physical area ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitPhysicalArea) != 0)
+        //        list.Add(1060428, prop.ToString()); // hit physical area ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitPoisonArea) != 0 )
-        //        list.Add( 1060429, prop.ToString() ); // hit poison area ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitPoisonArea) != 0)
+        //        list.Add(1060429, prop.ToString()); // hit poison area ~1_val~%
 
-        //    if ( (prop = m_AosWeaponAttributes.HitLeechStam) != 0 )
-        //        list.Add( 1060430, prop.ToString() ); // hit stamina leech ~1_val~%
+        //    if ((prop = m_AosWeaponAttributes.HitLeechStam) != 0)
+        //        list.Add(1060430, prop.ToString()); // hit stamina leech ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.BonusDex) != 0 )
-        //        list.Add( 1060409, prop.ToString() ); // dexterity bonus ~1_val~
+        //    if ((prop = m_AosAttributes.BonusDex) != 0)
+        //        list.Add(1060409, prop.ToString()); // dexterity bonus ~1_val~
 
-        //    if ( (prop = m_AosAttributes.BonusHits) != 0 )
-        //        list.Add( 1060431, prop.ToString() ); // hit point increase ~1_val~
+        //    if ((prop = m_AosAttributes.BonusHits) != 0)
+        //        list.Add(1060431, prop.ToString()); // hit point increase ~1_val~
 
-        //    if ( (prop = m_AosAttributes.BonusInt) != 0 )
-        //        list.Add( 1060432, prop.ToString() ); // intelligence bonus ~1_val~
+        //    if ((prop = m_AosAttributes.BonusInt) != 0)
+        //        list.Add(1060432, prop.ToString()); // intelligence bonus ~1_val~
 
-        //    if ( (prop = m_AosAttributes.LowerManaCost) != 0 )
-        //        list.Add( 1060433, prop.ToString() ); // lower mana cost ~1_val~%
+        //    if ((prop = m_AosAttributes.LowerManaCost) != 0)
+        //        list.Add(1060433, prop.ToString()); // lower mana cost ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.LowerRegCost) != 0 )
-        //        list.Add( 1060434, prop.ToString() ); // lower reagent cost ~1_val~%
+        //    if ((prop = m_AosAttributes.LowerRegCost) != 0)
+        //        list.Add(1060434, prop.ToString()); // lower reagent cost ~1_val~%
 
-        //    if ( (prop = GetLowerStatReq()) != 0 )
-        //        list.Add( 1060435, prop.ToString() ); // lower requirements ~1_val~%
+        //    if ((prop = GetLowerStatReq()) != 0)
+        //        list.Add(1060435, prop.ToString()); // lower requirements ~1_val~%
 
-        //    if ( (prop = (GetLuckBonus() + m_AosAttributes.Luck)) != 0 )
-        //        list.Add( 1060436, prop.ToString() ); // luck ~1_val~
+        //    if ((prop = (GetLuckBonus() + m_AosAttributes.Luck)) != 0)
+        //        list.Add(1060436, prop.ToString()); // luck ~1_val~
 
-        //    if ( (prop = m_AosWeaponAttributes.MageWeapon) != 0 )
-        //        list.Add( 1060438, (30 - prop).ToString() ); // mage weapon -~1_val~ skill
+        //    if ((prop = m_AosWeaponAttributes.MageWeapon) != 0)
+        //        list.Add(1060438, (30 - prop).ToString()); // mage weapon -~1_val~ skill
 
-        //    if ( (prop = m_AosAttributes.BonusMana) != 0 )
-        //        list.Add( 1060439, prop.ToString() ); // mana increase ~1_val~
+        //    if ((prop = m_AosAttributes.BonusMana) != 0)
+        //        list.Add(1060439, prop.ToString()); // mana increase ~1_val~
 
-        //    if ( (prop = m_AosAttributes.RegenMana) != 0 )
-        //        list.Add( 1060440, prop.ToString() ); // mana regeneration ~1_val~
+        //    if ((prop = m_AosAttributes.RegenMana) != 0)
+        //        list.Add(1060440, prop.ToString()); // mana regeneration ~1_val~
 
-        //    if ( (prop = m_AosAttributes.NightSight) != 0 )
-        //        list.Add( 1060441 ); // night sight
+        //    if ((prop = m_AosAttributes.NightSight) != 0)
+        //        list.Add(1060441); // night sight
 
-        //    if ( (prop = m_AosAttributes.ReflectPhysical) != 0 )
-        //        list.Add( 1060442, prop.ToString() ); // reflect physical damage ~1_val~%
+        //    if ((prop = m_AosAttributes.ReflectPhysical) != 0)
+        //        list.Add(1060442, prop.ToString()); // reflect physical damage ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.RegenStam) != 0 )
-        //        list.Add( 1060443, prop.ToString() ); // stamina regeneration ~1_val~
+        //    if ((prop = m_AosAttributes.RegenStam) != 0)
+        //        list.Add(1060443, prop.ToString()); // stamina regeneration ~1_val~
 
-        //    if ( (prop = m_AosAttributes.RegenHits) != 0 )
-        //        list.Add( 1060444, prop.ToString() ); // hit point regeneration ~1_val~
+        //    if ((prop = m_AosAttributes.RegenHits) != 0)
+        //        list.Add(1060444, prop.ToString()); // hit point regeneration ~1_val~
 
-        //    if ( (prop = m_AosWeaponAttributes.SelfRepair) != 0 )
-        //        list.Add( 1060450, prop.ToString() ); // self repair ~1_val~
+        //    if ((prop = m_AosWeaponAttributes.SelfRepair) != 0)
+        //        list.Add(1060450, prop.ToString()); // self repair ~1_val~
 
-        //    if ( (prop = m_AosAttributes.SpellChanneling) != 0 )
-        //        list.Add( 1060482 ); // spell channeling
+        //    if ((prop = m_AosAttributes.SpellChanneling) != 0)
+        //        list.Add(1060482); // spell channeling
 
-        //    if ( (prop = m_AosAttributes.SpellDamage) != 0 )
-        //        list.Add( 1060483, prop.ToString() ); // spell damage increase ~1_val~%
+        //    if ((prop = m_AosAttributes.SpellDamage) != 0)
+        //        list.Add(1060483, prop.ToString()); // spell damage increase ~1_val~%
 
-        //    if ( (prop = m_AosAttributes.BonusStam) != 0 )
-        //        list.Add( 1060484, prop.ToString() ); // stamina increase ~1_val~
+        //    if ((prop = m_AosAttributes.BonusStam) != 0)
+        //        list.Add(1060484, prop.ToString()); // stamina increase ~1_val~
 
-        //    if ( (prop = m_AosAttributes.BonusStr) != 0 )
-        //        list.Add( 1060485, prop.ToString() ); // strength bonus ~1_val~
+        //    if ((prop = m_AosAttributes.BonusStr) != 0)
+        //        list.Add(1060485, prop.ToString()); // strength bonus ~1_val~
 
-        //    if ( (prop = m_AosAttributes.WeaponSpeed) != 0 )
-        //        list.Add( 1060486, prop.ToString() ); // swing speed increase ~1_val~%
+        //    if ((prop = m_AosAttributes.WeaponSpeed) != 0)
+        //        list.Add(1060486, prop.ToString()); // swing speed increase ~1_val~%
 
         //    int phys, fire, cold, pois, nrgy;
 
-        //    GetDamageTypes( null, out phys, out fire, out cold, out pois, out nrgy );
+        //    GetDamageTypes(null, out phys, out fire, out cold, out pois, out nrgy);
 
-        //    if ( phys != 0 )
-        //        list.Add( 1060403, phys.ToString() ); // physical damage ~1_val~%
+        //    if (phys != 0)
+        //        list.Add(1060403, phys.ToString()); // physical damage ~1_val~%
 
-        //    if ( fire != 0 )
-        //        list.Add( 1060405, fire.ToString() ); // fire damage ~1_val~%
+        //    if (fire != 0)
+        //        list.Add(1060405, fire.ToString()); // fire damage ~1_val~%
 
-        //    if ( cold != 0 )
-        //        list.Add( 1060404, cold.ToString() ); // cold damage ~1_val~%
+        //    if (cold != 0)
+        //        list.Add(1060404, cold.ToString()); // cold damage ~1_val~%
 
-        //    if ( pois != 0 )
-        //        list.Add( 1060406, pois.ToString() ); // poison damage ~1_val~%
+        //    if (pois != 0)
+        //        list.Add(1060406, pois.ToString()); // poison damage ~1_val~%
 
-        //    if ( nrgy != 0 )
-        //        list.Add( 1060407, nrgy.ToString() ); // energy damage ~1_val~%
+        //    if (nrgy != 0)
+        //        list.Add(1060407, nrgy.ToString()); // energy damage ~1_val~%
 
-        //    list.Add( 1061168, "{0}\t{1}", MinDamage.ToString(), MaxDamage.ToString() ); // weapon damage ~1_val~ - ~2_val~
-        //    list.Add( 1061167, Speed.ToString() ); // weapon speed ~1_val~
+        //    list.Add(1061168, "{0}\t{1}", MinDamage.ToString(), MaxDamage.ToString()); // weapon damage ~1_val~ - ~2_val~
 
-        //    if ( MaxRange > 1 )
-        //        list.Add( 1061169, MaxRange.ToString() ); // range ~1_val~
-
-        //    int strReq = AOS.Scale( StrRequirement, 100 - GetLowerStatReq() );
-
-        //    if ( strReq > 0 )
-        //        list.Add( 1061170, strReq.ToString() ); // strength requirement ~1_val~
-
-        //    if ( Layer == Layer.TwoHanded )
-        //        list.Add( 1061171 ); // two-handed weapon
+        //    if (Core.ML)
+        //        list.Add(1061167, String.Format("{0}s", Speed)); // weapon speed ~1_val~
         //    else
-        //        list.Add( 1061824 ); // one-handed weapon
+        //        list.Add(1061167, Speed.ToString());
 
-        //    if ( Core.SE || m_AosWeaponAttributes.UseBestSkill == 0 )
+        //    if (MaxRange > 1)
+        //        list.Add(1061169, MaxRange.ToString()); // range ~1_val~
+
+        //    int strReq = AOS.Scale(StrRequirement, 100 - GetLowerStatReq());
+
+        //    if (strReq > 0)
+        //        list.Add(1061170, strReq.ToString()); // strength requirement ~1_val~
+
+        //    if (Layer == Layer.TwoHanded)
+        //        list.Add(1061171); // two-handed weapon
+        //    else
+        //        list.Add(1061824); // one-handed weapon
+
+        //    if (Core.SE || m_AosWeaponAttributes.UseBestSkill == 0)
         //    {
-        //        switch ( Skill )
+        //        switch (Skill)
         //        {
-        //            case SkillName.Swords:  list.Add( 1061172 ); break; // skill required: swordsmanship
-        //            case SkillName.Macing:  list.Add( 1061173 ); break; // skill required: mace fighting
-        //            case SkillName.Fencing: list.Add( 1061174 ); break; // skill required: fencing
-        //            case SkillName.Archery: list.Add( 1061175 ); break; // skill required: archery
+        //            case SkillName.Swords: list.Add(1061172); break; // skill required: swordsmanship
+        //            case SkillName.Macing: list.Add(1061173); break; // skill required: mace fighting
+        //            case SkillName.Fencing: list.Add(1061174); break; // skill required: fencing
+        //            case SkillName.Archery: list.Add(1061175); break; // skill required: archery
         //        }
         //    }
 
-        //    if ( m_Hits >= 0 && m_MaxHits > 0 )
-        //        list.Add( 1060639, "{0}\t{1}", m_Hits, m_MaxHits ); // durability ~1_val~ / ~2_val~
+        //    if (m_Hits >= 0 && m_MaxHits > 0)
+        //        list.Add(1060639, "{0}\t{1}", m_Hits, m_MaxHits); // durability ~1_val~ / ~2_val~
         //}
-        #endregion 19MAR2008 RP Flavoring to Weapon Display - OLD *** END   ***
 
         #region 19MAR2008 RP Flavoring to Weapon Display - NEW *** START ***
         public override void GetProperties(ObjectPropertyList list)
@@ -3601,8 +3630,6 @@ namespace Server.Items
         }
         #endregion 19MAR2008 RP Flavoring to Weapon Display - NEW *** END   ***
         //19MAR2008 RP Flavoring to Weapon Displays *** END ***
-
-
         public override void OnSingleClick(Mobile from)
         {
             List<EquipInfoAttribute> attrs = new List<EquipInfoAttribute>();
