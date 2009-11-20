@@ -44,7 +44,10 @@ rename "Data\Decoration\Trammel\Teleporters - New Dungeons.cfg" *.distro
 xcopy Scripts\Custom\Distro\Data\*.* Data\*.* /s
 
 rem Bestiary Setup
-md \Bestiary
-xcopy Scripts\Custom\Server\Bestiary by Arul\Bestiary\Bestiary\*.* \Bestiary /sxc
-xcopy Scripts\Custom\Server\Bestiary by Arul\Data\*.* Data\*.* /sxc
+rem Bestiary Setup
+md Bestiary
+md Data\Bestiary
+xcopy "Scripts\Custom\Server\Bestiary by Arul\Bestiary\*.*" Bestiary /s
+xcopy "Scripts\Custom\Server\Bestiary by Arul\Data\*.*" Data\Bestiary\ /s
 
+pause
