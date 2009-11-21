@@ -1,5 +1,11 @@
+body {
+	background-color: Black;
+	font-family: Helvetica;
+	color: LimeGreen;
+}
+
 .mobileEntry {
-	color: #fff;
+	color: White;
 	font-family: Helvetica;
 	text-align: left;
 }

@@ -1,3 +1,4 @@
+//20NOV2009 Updated path for An Nox and added custom HTML
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -49,16 +50,24 @@ namespace Server.Bestiary
             }
 
             //using (StreamWriter writer = new StreamWriter(Path.Combine("./Bestiary/", "index.html")))
-            using (StreamWriter writer = new StreamWriter( Path.Combine ("C:/Inetpub/wwwroot/status/Bestiary/", "index.html")))
+            using (StreamWriter writer = new StreamWriter(Path.Combine("C:/Inetpub/wwwroot/status/Bestiary/", "index.html")))
             {
                 int index = 0;
                 char letter = 'a';
+
+                writer.WriteLine("<html>");
+                writer.WriteLine("<head>");
+                writer.WriteLine("<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" />");
+                writer.WriteLine("<center>");
+                writer.WriteLine("<img src=\"http://annox.no-ip.com/images/AnNoxBanner-05NOV2009.jpg\" alt=\"annox.no-ip.com\" />>");
+                writer.WriteLine("</center>");
+                writer.WriteLine("</head>");
 
                 foreach (List<MobileEntry> var in entries)
                 {
                     if (var.Count != 0)
                     {
-                        writer.WriteLine("<font size=\"4\">{0}</font> ({1} {2})", letter++, var.Count, (var.Count == 1 ? "mobile" : "mobiles"));
+                        writer.WriteLine("<font size=\"4\">{0} ({1} {2})</font>", letter++, var.Count, (var.Count == 1 ? "mobile" : "mobiles"));
                         writer.WriteLine("	<div style=\"padding-left: 15px\">");
 
                         foreach (MobileEntry entry in var)
@@ -67,12 +76,12 @@ namespace Server.Bestiary
 
                             if (index != 0 && all.Count != 1)
                             {
-                                entry.PrevLink = string.Format("		<a href=\"mobile.{0}.html\" style=\"font-weight: bold; font-size: 11px; color: #ccc\">&lt; {1}</a>", all[index - 1].MasterType.Name, all[index - 1].Name);
+                                entry.PrevLink = string.Format("		<a href=\"mobile.{0}.html\" style=\"font-weight: bold; font-size: 11px; color: #348017\">&lt; {1}</a>", all[index - 1].MasterType.Name, all[index - 1].Name);
                             }
 
                             if ((index + 1) != all.Count)
                             {
-                                entry.NextLink = string.Format("		<a href=\"mobile.{0}.html\" style=\"font-weight: bold; font-size: 11px; color: #ccc\">{1} &gt;</a>", all[index + 1].MasterType.Name, all[index + 1].Name);
+                                entry.NextLink = string.Format("		<a href=\"mobile.{0}.html\" style=\"font-weight: bold; font-size: 11px; color: #348017\">{1} &gt;</a>", all[index + 1].MasterType.Name, all[index + 1].Name);
                             }
 
                             //using (StreamWriter entryWriter = new StreamWriter(Path.Combine("./Bestiary/content/", string.Format("mobile.{0}.html", entry.MasterType.Name))))
@@ -88,6 +97,8 @@ namespace Server.Bestiary
                         writer.WriteLine("	<hr noshade />");
                     }
                 }
+                writer.WriteLine("</body>");
+                writer.WriteLine("</html>");
             }
             // all mobiles, unless they're empty, have been indexed. Our job's done!
         }
