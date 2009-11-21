@@ -22,10 +22,12 @@ public class Currency : Item
     private Type m_Type;
     private int m_ItemID;
     private string m_Name;
+    private int m_Hue;
 
     public Type PaymentType { get { return m_Type; } }
     public string PayName { get { return m_Name; } }
     public int PayID { get { return m_ItemID; } }
+    public int CurrHue { get { return m_Hue; } } 
 
     public enum Payment
     {
@@ -52,8 +54,9 @@ public class Currency : Item
 
         m_Type = i.GetType();
         m_PropertyInfo = null;
-        m_ItemID = i.ItemID;
-        m_Name = i.GetType().Name;
+        m_ItemID = CoinID(i.ItemID);
+        m_Name = GetName(i);
+        m_Hue = i.Hue;
     }
     //consume property on player
     public Currency(Mobile m, PropertyInfo pi)
@@ -70,10 +73,59 @@ public class Currency : Item
         m_PaymentType = Payment.ByProperty;
         m_Type = i.GetType();
         m_PropertyInfo = pi;
-        m_ItemID = i.ItemID;
-        m_Name = i.GetType().Name + "'s " + pi.Name;
+        m_ItemID = CoinID(i.ItemID);
+        m_Name = GetName(i) + "'s " + pi.Name;
+        m_Hue = i.Hue;
     }
+    public void Modify(Type t, string append)
+    {
+        if ( (t is Mobile) || append == null )
+            return;
 
+        Item i;
+        
+        i = (Item)Activator.CreateInstance(t, null);
+        m_Name = GetName(i) + append;
+        m_Hue = i.Hue;
+        m_ItemID = CoinID(m_ItemID);
+        
+    }
+    public int CoinID(int itemID)
+    {
+        if (itemID == 3821)
+            return 3823;
+        else if (itemID == 3824)
+            return 3826;
+        else
+            return itemID;
+    }
+    public void VOneUpdate()
+    {
+        switch (m_PaymentType)
+        {
+            case Payment.ByGold:
+            case Payment.ByItem:
+                {
+                    Modify(m_Type, "");
+                    break;
+                }
+            case Payment.ByProperty:
+                {
+                    if (!(m_Type is Mobile))
+                        Modify(m_Type, "'s " + m_PropertyInfo.Name);
+                    break;
+                }
+        }
+
+     }  
+                
+    public string GetName(Item i)
+    {
+        if (String.IsNullOrEmpty(i.Name))
+            return i.GetType().Name;
+        else
+            return i.Name;
+    }
     public bool Purchase(Mobile m, int cost)
     {
         int remain = Value(m) - cost;
@@ -256,7 +308,10 @@ public class Currency : Item
 	public override void Serialize( GenericWriter writer )
 	{
 		base.Serialize( writer );
-		writer.Write( (int) 0 );
+		writer.Write( (int) 1 );
+
+        //version 1
+        writer.Write((int)m_Hue);
         
         //explicit casts are given for clarification        
         writer.Write((int)m_PaymentType);
@@ -271,17 +326,37 @@ public class Currency : Item
 	{
 		base.Deserialize( reader );
 		int version = reader.ReadInt();
+
         
-        m_PaymentType = (Payment)reader.ReadInt();
 
-        try { string name = reader.ReadString(); m_Type = ScriptCompiler.FindTypeByName(name); }
-        catch { }
+        switch (version)
+        {
+            case 1:
+                {
+                    m_Hue = reader.ReadInt();
+                    goto case 0;
+                }
+            case 0:
+                {
+                    m_PaymentType = (Payment)reader.ReadInt();
 
-        try { string propName = reader.ReadString(); if (propName.Equals("")) { m_PropertyInfo = null; } else { m_PropertyInfo = m_Type.GetProperty(propName); } }
-        catch { }
+                    try { string name = reader.ReadString(); m_Type = ScriptCompiler.FindTypeByName(name); }
+                    catch { }
 
-        m_ItemID = reader.ReadInt();
-        m_Name = reader.ReadString();
+                    try { string propName = reader.ReadString(); if (propName.Equals("")) { m_PropertyInfo = null; } else { m_PropertyInfo = m_Type.GetProperty(propName); } }
+                    catch { }
+
+                    m_ItemID = reader.ReadInt();
+                    m_Name = reader.ReadString();
+
+                    break;
+                }
+        }
+        if (version == 0)
+        {
+            try { VOneUpdate(); }
+            catch {  }
+        }
      }
 }
 
@@ -362,7 +437,7 @@ public class Reward : Item, ICloneable
     {
         get { return m_Reward; }
     }
-    //use only when creating reward for player
+    //use only when creating Reward for player
     public Item RewardCopy
     {
         get { return GetReward(); }
@@ -873,13 +948,14 @@ public class Exhibit : Item
     private Reward m_Reward;
     private ObjectPropertyList m_PropertyList;
 
-    public Exhibit(IRewardVendor vendor, Reward r) : base()
+    public Exhibit(IRewardVendor vendor, Reward r)
+        : base()
     {
         m_Vendor = vendor;
         m_Reward = r;
-               
+
         SetOPL(r);
-        
+
         this.ItemID = r.RewardInfo.ItemID;
         this.Hue = r.RewardInfo.Hue;
     }
@@ -890,7 +966,7 @@ public class Exhibit : Item
             m_PropertyList = new ObjectPropertyList(this);
             m_PropertyList.Add("Display [Broken]");
         }
-        
+
         from.Send(m_PropertyList);
     }
     public void SetOPL(Reward r)
@@ -906,52 +982,52 @@ public class Exhibit : Item
 
         m_PropertyList.Terminate();
         m_PropertyList.SetStatic();
-                            
+
     }
-    
+
     public override void OnDoubleClick(Mobile m)
     {
         if (m_Vendor == null || m_Vendor.IsRemoved() || m_Reward == null || !m_Vendor.Display.Contains(m_Reward))
         {
             m_Vendor = null; // free up resource
-            m_Reward = null; 
+            m_Reward = null;
             m.SendMessage("This item is no longer available to purchase.");
-        }        
+        }
         else
             m.SendGump(new ViewItemGump(m, m_Vendor, m_Reward, false));
     }
-  
+
     public Exhibit(Serial serial)
         : base(serial)
-	{
-	}
-	public override void Deserialize( GenericReader reader )
-	{
-		base.Deserialize( reader );
+    {
+    }
+    public override void Deserialize(GenericReader reader)
+    {
+        base.Deserialize(reader);
 
-		int version = reader.ReadInt();
+        int version = reader.ReadInt();
 
         if (reader.ReadBool())
         {
             m_Reward = (Reward)reader.ReadItem();
 
-            m_Vendor = (IRewardVendor)reader.ReadMobile(); 
-            
-            try { SetOPL(m_Reward); } 
+            m_Vendor = (IRewardVendor)reader.ReadMobile();
+
+            try { SetOPL(m_Reward); }
             catch { }
-        }                       
-	}
+        }
+    }
 
-	public override void Serialize( GenericWriter writer )
-	{
-		base.Serialize( writer );
+    public override void Serialize(GenericWriter writer)
+    {
+        base.Serialize(writer);
 
-		writer.Write( (int)0 ); // version  
+        writer.Write((int)0); // version  
 
         if (m_Vendor == null || m_Vendor.IsRemoved() || m_Reward == null || m_Reward.Deleted)
         {
             m_Vendor = null;
-            m_Reward = null; 
+            m_Reward = null;
 
             writer.Write((bool)false); //do not deserialize
         }
@@ -960,10 +1036,10 @@ public class Exhibit : Item
             writer.Write((bool)true);
 
             writer.WriteItem((Reward)m_Reward);
-           
+
             writer.Write((Mobile)m_Vendor.GetMobile());
-        }       
-	}
+        }
+    }
 }
 public class ViewItemGump : Gump
 {
@@ -996,7 +1072,7 @@ public class ViewItemGump : Gump
         AddLabel(407, 444, 2116, @"Cancel");
         AddImageTiled(184, 239, 510, 8, 9201);
 
-        AddItem(182, 376, m_Vendor.Payment.PayID);
+        AddItem(182, 376, m_Vendor.Payment.PayID, m_Vendor.Payment.CurrHue);
         AddLabel(248, 369, 83, @"Pay By: " + m_Vendor.Payment.PayName);
         AddLabel(184, 268, 43, @"Vendor: " + m_Vendor.GetName());
         AddLabel(363, 216, 2123, r.Title);
@@ -1009,8 +1085,12 @@ public class ViewItemGump : Gump
             {
                 AddLabel(336, 296, 2101, @"Edit Item");
                 AddButton(294, 293, 4011, 4012, 4, GumpButtonType.Reply, 0); //edit item
-                AddLabel(336, 348, 2101, @"Get Display");
-                AddButton(294, 345, 4011, 4012, 3, GumpButtonType.Reply, 0); //get display   
+
+                if (m_Vendor.GetMobile() != null)
+                {
+                    AddLabel(336, 348, 2101, @"Get Display");
+                    AddButton(294, 345, 4011, 4012, 3, GumpButtonType.Reply, 0); //get display   
+                }
             }
         }
         else
@@ -1069,7 +1149,7 @@ public class ViewItemGump : Gump
                     }
                     catch
                     {
-                        m.SendMessage("This reward can no longer be found.");
+                        m.SendMessage("This Reward can no longer be found.");
                     }
                     break;
                 }
@@ -1094,7 +1174,7 @@ public class ViewItemGump : Gump
                             if (!m.PlaceInBackpack(i))
                             {
                                 bank.DropItem(i);
-                                m.SendMessage("You are overweight, the reward was added to your bank");
+                                m.SendMessage("You are overweight, the Reward was added to your bank");
                             }
 
                             m.SendMessage("You bought {0} for {1} {2}.", m_Reward.Title, m_Reward.Cost, curr.PayName);
@@ -1187,7 +1267,7 @@ public class WorldVendorsGump : Gump
             try { source.CopyVendor(target); }
             catch { from.SendMessage("Error occured while copying, please insure backpack is on vendors."); return; }
 
-            from.SendMessage("{0} has copied {1}'s reward collection", source.GetName(), target.GetName());
+            from.SendMessage("{0} has copied {1}'s Reward collection", source.GetName(), target.GetName());
         }
     }
     public override void OnResponse(NetState sender, RelayInfo info)
@@ -1243,7 +1323,13 @@ public class WorldVendorsGump : Gump
             AddButton(279, yPos + 38, 4011, 4012, ++buttonNum, GumpButtonType.Reply, pageNum); //copy vendor - even ID
             AddLabel(86, yPos, 1849, WorldRewardVendors.Vendors[i].GetName());
             AddImageTiled(86, yPos + 93, 359, 2, 96);
-            AddItem(110, yPos + 27, 8461);
+
+            if (WorldRewardVendors.Vendors[i].GetMobile() != null)
+                AddItem(110, yPos + 27, 8461); // person
+            else
+
+                AddItem(110, yPos + 27, WorldRewardVendors.Vendors[i].GetItem().ItemID, WorldRewardVendors.Vendors[i].GetItem().Hue); //stone ID
+
             AddLabel(213, yPos + 43, 2209, @"Go To");
             AddLabel(318, yPos + 43, 2204, @"Copy Vendor");
             
@@ -1290,7 +1376,7 @@ public class InfoGump : Gump
         AddLabel(239, 479, 37, @"Author: krazeykow1102");
         AddItem(391, 467, 8451);
         AddLabel(24, 368, 2000, @"How Displays Work");
-        AddHtml(24, 394, 410, 78, @"Displays allow you to create your own interactive reward room.  The display is a simple mirror to the item on the vendor.  Payment and cost will reflect what is on the vendor.  Vendor must stay in tact for display to function", (bool)true, (bool)true);
+        AddHtml(24, 394, 410, 78, @"Displays allow you to create your own interactive Reward room.  The display is a simple mirror to the item on the vendor.  Payment and cost will reflect what is on the vendor.  Vendor must stay in tact for display to function", (bool)true, (bool)true);
     }
 }
 
@@ -1334,15 +1420,20 @@ public class ControlPanelGump : Gump
         AddLabel(11, 232, 55, @"Target Payment Source");
         AddButton(73, 259, 2117, 2118, 3, GumpButtonType.Reply, 0); //Payment
         AddLabel(12, 173, 55, @"Pay By: " + m_Vendor.Payment.PayName );
-        AddItem(61, 197, m_Vendor.Payment.PayID);
+        AddItem(61, 197, m_Vendor.Payment.PayID, m_Vendor.Payment.CurrHue);
 
         AddLabel(12, 32, 55, @"Vendor: " + m_Vendor.GetName());
         AddButton(77, 533, 4026, 4027, 4, GumpButtonType.Reply, 0);
         AddLabel(78, 553, 104, @"Help");
 
-        AddButton(72, 91, 4011, 4012, 5, GumpButtonType.Reply, 0); //Displays
-        AddLabel(109, 93, 55, @"Get All Displays");
-       
+        if (m_Vendor.GetMobile() != null)
+        {
+            AddButton(72, 91, 4011, 4012, 5, GumpButtonType.Reply, 0); //Displays
+            AddLabel(109, 93, 55, @"Get All Displays");
+        }
+        else
+            AddLabel(12, 93, 55, @"Use Mobile Vendor for displays.");
+
         AddLabel(51, 303, 43, @"Consume Item");
         AddRadio(15, 300, 9720, 9724, false, 6);
         AddLabel(50, 349, 43, @"[props of (Item/Player)");
@@ -1444,10 +1535,15 @@ public class ControlPanelGump : Gump
                 {
                     try
                     {
-                        Type menuType = MenuUploader.Menus[info.ButtonID - 6];            
+                        Type menuType = MenuUploader.Menus[info.ButtonID - 6];
 
-                        m_Vendor.Menu = menuType;
-                        m.SendMessage("Display changed to " + menuType.Name);
+                        if (m_Vendor.GetItem() != null && menuType.Equals(typeof(ClassicVendorGump)))
+                            m.SendMessage("Only Mobile Reward Vendors can have classic menus.");
+                        else
+                        {
+                            m_Vendor.Menu = menuType;
+                            m.SendMessage("Display changed to " + menuType.Name);
+                        }
                     }
                     catch { }
 
@@ -1463,9 +1559,11 @@ public class ControlPanelGump : Gump
         int yPos = 433, pageNum = 1;
 
         for (int i = 0; i < MenuUploader.Menus.Count; ++i )
-        {           
+        {
+
             AddLabel(50, yPos, 100, MenuUploader.Menus[i].Name);
             AddButton(12, yPos, 4005, 4006, (i + 6), GumpButtonType.Reply, pageNum);
+            
 
             yPos += 26;
 
@@ -1481,7 +1579,7 @@ public class ControlPanelGump : Gump
                 //reset to top of page
                 yPos = 433;
             }
-        }
+        } 
     }
 }
 public static class MenuUploader 
@@ -1502,7 +1600,7 @@ public static class MenuUploader
         //create 'canvas'
         menu.CreateBackground();
 
-        //create reward displays
+        //create Reward displays
         foreach (Reward r in vendor.Rewards)
         {
             //refresh restock  
@@ -1617,9 +1715,9 @@ public class ManageItemsGump : JewlRewardGump
             Storage store = (Storage)state;
 
             IRewardVendor vendor = (IRewardVendor)store[0];
-            Reward reward = (Reward)store[1];
+            Reward Reward = (Reward)store[1];
 
-            try { vendor.RemoveReward(reward); }
+            try { vendor.RemoveReward(Reward); }
             catch { from.SendMessage("An error ocurred in the removal of this item."); }
             
             MenuUploader.Display(vendor.Menu, from, vendor, true);
@@ -1641,7 +1739,7 @@ public class ManageItemsGump : JewlRewardGump
                 {
                     Reward r = Vendor.Rewards[(info.ButtonID / 2) - 1];
 
-                    //params -> (vendor, reward)
+                    //params -> (vendor, Reward)
                     Storage store = new Storage(Vendor, r);
 
                     m.SendGump(new WarningGump(1060635, 30720, "Warning: Are you sure you want to remove " + r.Title, 0xFFC000, 420, 400, new WarningGumpCallback(DeleteReward_Callback), store));
@@ -1732,7 +1830,7 @@ public class JewlRewardGump : Gump, IRewardVendorGump
         AddImage(210, 52, 9818);
         AddImage(534, 52, 9818);
         AddLabel(404, 119, 2125, @"You have:");
-        AddItem(348, 126, m_Vendor.Payment.PayID, 0);
+        AddItem(348, 126, m_Vendor.Payment.PayID, m_Vendor.Payment.CurrHue);
         AddLabel(404, 137, 2125, (m_CurrencyAmnt.ToString() + " " + m_Vendor.Payment.PayName) );
         
 
@@ -1760,7 +1858,7 @@ public class JewlRewardGump : Gump, IRewardVendorGump
 
         AddLabel(227, m_PosY, 2123, r.Title);
         AddLabel(324, (m_PosY + 45), 2115, "Cost: " + r.Cost);
-        AddImageTiledButton(227, (m_PosY + 26), 2328, 2329, (m_EntryNum), GumpButtonType.Reply, m_PageNum, b.ItemID, b.Hue, 15, 10, r.Display.Header);
+        AddImageTiledButton(227, (m_PosY + 26), 2328, 2329, (m_EntryNum), GumpButtonType.Reply, m_PageNum, b.ItemID, b.Hue, 15, 10, b.LocalizedTooltip);
         AddImageTiled(215, (m_PosY + 95), 359, 2, 96);
         AddButton(470, (PosY + 45), 4011, 4012, (m_EntryNum), GumpButtonType.Reply, m_PageNum);
         AddLabel(508, (PosY + 47), 745, @"View Item");
@@ -1866,7 +1964,7 @@ public class DisplayBox : LargeCrate, IEnumerable
         catch (NullReferenceException)
         {
             if (staff)
-                m.SendMessage("Display error - please insure reward is still on this vendor.");
+                m.SendMessage("Display error - please insure Reward is still on this vendor.");
             else
                 m.SendMessage(invalid);
         }
@@ -2096,7 +2194,7 @@ public class ClassicVendorGump : Gump, IRewardVendorGump
 
         AddPage(0);
         AddImage(36, 105, 2162);
-        AddItem(111, 217, m_Vendor.Payment.PayID);
+        AddItem(111, 217, m_Vendor.Payment.PayID, m_Vendor.Payment.CurrHue);
         AddLabel(110, 172, 2122, @"Pay By:  " + m_Vendor.Payment.PayName);
         AddLabel(110, 299, 2120, @"You have: " + m_Vendor.Payment.Value(m_Mobile));
         AddImage(71, 302, 57);
@@ -2145,7 +2243,7 @@ public class MobileRewardVendor : Banker, IRewardVendor
         //default is Gold
         m_Currency = new Currency();
         m_Rewards = new RewardCollection();
-        m_Menu = typeof(JewlRewardGump);
+        m_Menu = typeof(ClassicVendorGump);
         m_Box = new DisplayBox();
 
         //add to world collection
@@ -2300,7 +2398,7 @@ public class MobileRewardVendor : Banker, IRewardVendor
                     if (!buyer.PlaceInBackpack(i))
                     {
                         bank.DropItem(i);
-                        buyer.SendMessage("You are overweight, the reward was added to your bank");
+                        buyer.SendMessage("You are overweight, the Reward was added to your bank");
                     }
                 }
 
@@ -2395,18 +2493,186 @@ public class MobileRewardVendor : Banker, IRewardVendor
         }
 	}
 }
-public class StoneRewardVendor : DisplayBox
+public class StoneRewardHolder : MetalBox
 {
+    private StoneRewardVendor m_S_Vendor;
+
+    public StoneRewardHolder(StoneRewardVendor sv)
+        : base()
+    {
+        m_S_Vendor = sv;
+        this.Movable = false;
+        this.Name = sv.Name + "'s Display Container [DO NOT DELETE]";
+    }
+    public override void OnItemLifted(Mobile m, Item item)
+    {
+        m.SendMessage("This item should not be moved away from the vendor.");
+    }
+
+    public void UpdateName()
+    {
+        if (m_S_Vendor == null)
+            return;
+
+        this.Name = m_S_Vendor.Name + "'s Display Container [DO NOT DELETE]";
+    }
+    public StoneRewardHolder(Serial serial)
+        : base(serial)
+	{
+	}
+
+	public override void Serialize( GenericWriter writer )
+	{
+		base.Serialize( writer );
+
+		writer.Write( (int) 0 ); // version
+	}
+
+	public override void Deserialize( GenericReader reader )
+	{
+		base.Deserialize( reader );
+
+		int version = reader.ReadInt();
+    }
+}
+public class StoneRewardVendor : Item, IRewardVendor
+{
+    private Currency m_Currency;
+    private RewardCollection m_Rewards;
+    private Type m_Menu;
+    private StoneRewardHolder m_Box_Holder;
+    private DisplayBox m_Box;
+
+    Currency IRewardVendor.Payment
+    {
+        get { return m_Currency; }
+        set { m_Currency = value; }
+    }
+    RewardCollection IRewardVendor.Rewards
+    {
+        get { return m_Rewards; }
+        set { m_Rewards = value; }
+    }
+    Type IRewardVendor.Menu
+    {
+        get { return m_Menu; }
+        set { m_Menu = value; }
+    }
+    DisplayBox IRewardVendor.Display
+    {
+        get { return m_Box; }
+    }
+
     [Constructable]
     public StoneRewardVendor()
         : base()
     {
+        m_Currency = new Currency();
+        m_Rewards = new RewardCollection();
+        m_Menu = typeof(JewlRewardGump);
+        m_Box = new DisplayBox();
+
+        ItemID = 0xEDC;
+        Name = "Stone Vendor";
+
+        WorldRewardVendors.RegisterVendor(this);
+
+        m_Box_Holder = new StoneRewardHolder(this);
+        m_Box_Holder.DropItem(m_Box);      
+
         this.Movable = false;
     }
+    public override void OnLocationChange( Point3D oldLocation )
+    {
+        base.OnLocationChange(oldLocation);
 
+        if (m_Box_Holder != null)
+        {
+            m_Box_Holder.Location = this.Location;
+            m_Box_Holder.Z = this.Z - 10;
+        }
+    }
+    public override void OnMapChange()
+    {
+        base.OnMapChange();
+
+        if ( m_Box_Holder != null )
+            m_Box_Holder.Map = this.Map;
+    }
+    Mobile IRewardVendor.GetMobile()
+    {
+        return null;
+    }
+    Item IRewardVendor.GetItem()
+    {
+        return this;
+    }
+
+    bool IRewardVendor.IsRemoved()
+    {
+        return this.Deleted;
+    }
+    Container IRewardVendor.GetContainer()
+    {
+        return m_Box_Holder;
+    }
+    string IRewardVendor.GetName()
+    {
+        return this.Name;
+    }
+    Map IRewardVendor.GetMap()
+    {
+        return this.Map;
+    }
+    Point3D IRewardVendor.GetLocation()
+    {
+        return this.Location;
+    }
+    void IRewardVendor.AddReward(Reward r)
+    {
+        m_Box.AddDisplay(r);
+        m_Rewards.Add(r);
+    }
+    void IRewardVendor.RemoveReward(Reward r)
+    {
+        m_Rewards.Remove(r);
+        m_Box.RemoveDisplay(r);
+    }
+
+    void IRewardVendor.CopyVendor(IRewardVendor vendor)
+    {
+        Item currBox = m_Box_Holder.FindItemByType(typeof(DisplayBox));
+        currBox.Delete();
+
+        m_Currency = vendor.Payment;
+        m_Menu = vendor.Menu;
+
+        m_Rewards = (RewardCollection)((vendor.Rewards as ICloneable).Clone());
+        m_Box = new DisplayBox(m_Rewards);
+
+        m_Box_Holder.DropItem(m_Box);
+    }
+    //End Warning
+    public override void OnDelete()
+    {
+        if ( m_Box_Holder != null)
+            m_Box_Holder.Delete();
+
+        WorldRewardVendors.RemoveVendor(this);
+        base.OnDelete();
+    }
+    
     public override void OnDoubleClick(Mobile m)
     {
+        if (m_Box_Holder != null)
+        {
+            m_Box_Holder.MoveToWorld(this.Location, this.Map);
+            m_Box_Holder.Z = this.Z - 10;
+            m_Box_Holder.UpdateName();
+        }
+        MenuUploader.Display(m_Menu, m, this, false);
     }
+     
     public StoneRewardVendor(Serial serial)
         : base(serial)
     {
@@ -2414,12 +2680,54 @@ public class StoneRewardVendor : DisplayBox
 
     public override void Serialize(GenericWriter writer)
     {
+        base.Serialize(writer);
+
         writer.Write((int)0); //Version 0
+
+        int count = m_Rewards.Count;
+        writer.Write((int)count);
+
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                writer.WriteItem((Reward)m_Rewards[i]);
+            }
+        }
+
+        writer.WriteItem((Currency)m_Currency);
+        writer.Write((string)m_Menu.Name);
+        writer.WriteItem((DisplayBox)m_Box);
+        writer.WriteItem((StoneRewardHolder)m_Box_Holder);
     }
 
     public override void Deserialize(GenericReader reader)
     {
+        base.Deserialize(reader);
+
+        WorldRewardVendors.RegisterVendor(this);
+
         int version = reader.ReadInt();
+
+        m_Rewards = new RewardCollection();
+
+        int count = reader.ReadInt();
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Reward r = (Reward)reader.ReadItem();
+                m_Rewards.Add(r);
+            }
+        }
+
+        m_Currency = (Currency)reader.ReadItem();
+
+        try { string name = reader.ReadString(); m_Menu = ScriptCompiler.FindTypeByName(name); }
+        catch { m_Menu = typeof(JewlRewardGump); }
+
+        m_Box = (DisplayBox)reader.ReadItem();
+        m_Box_Holder = (StoneRewardHolder)reader.ReadItem();
     }
 }
 public interface IRewardVendor
