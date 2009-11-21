@@ -1607,7 +1607,8 @@ namespace Server.Bestiary
 			
 			if( Bestiary.UseFixes )
 			{
-				string fixPath = Path.Combine("Bestiary/fixes", m_MasterType.Name + ".jpg");
+				//string fixPath = Path.Combine("Bestiary/fixes", m_MasterType.Name + ".jpg");
+                string fixPath = Path.Combine("C:/Inetpub/wwwroot/status/Bestiary/fixes", m_MasterType.Name + ".jpg");
 				
 				if( File.Exists(fixPath) )
 				{
@@ -1677,7 +1678,8 @@ namespace Server.Bestiary
                                         gr.DrawImage(m_BorderImage, 0, 0, m_BorderImage.Width, m_BorderImage.Height);
                                         gr.DrawImage(tz, (result.Width >> 1) - (tz.Width >> 1), 25);
 
-                                        result.Save(Path.Combine("./Bestiary/images/", m_MasterType.Name + ".jpg"), m_Encoder, m_EncoderParameter);
+                                        //result.Save(Path.Combine("./Bestiary/images/", m_MasterType.Name + ".jpg"), m_Encoder, m_EncoderParameter);
+                                        result.Save(Path.Combine("C:/Inetpub/wwwroot/status/Bestiary/images/", m_MasterType.Name + ".jpg"), m_Encoder, m_EncoderParameter);
                                     }
                                 }
                             }
