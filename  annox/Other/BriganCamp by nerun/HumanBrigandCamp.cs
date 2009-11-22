@@ -7,7 +7,8 @@ namespace Server.Multis
 {
     public class HumanBrigandCamp : BaseCamp
     {
-        public virtual Mobile Camper { get { return new HumanBrigand(); } }
+        //public virtual Mobile Camper { get { return new HumanBrigand(); } }
+        public virtual Mobile Camper { get { return new EscortableMage(); } }
 
         private Mobile m_Prisoner;
 
