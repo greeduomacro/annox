@@ -1783,7 +1783,7 @@ namespace Server.Mobiles
 
         public override bool OnMoveOver(Mobile m)
         {
-            if (m is BaseCreature && !((BaseCreature)m).Controlled)
+            if (Alive && m is BaseCreature && !((BaseCreature)m).Controlled)
                 return false;
 
             return base.OnMoveOver(m);
