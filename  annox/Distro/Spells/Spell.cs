@@ -277,7 +277,7 @@ namespace Server.Spells
 
         public virtual double GetDamageSkill(Mobile m)
         {
-            m.CheckSkill(DamageSkill, 0.0, m.Skills[DamageSkill].Cap);
+            //m.CheckSkill(DamageSkill, 0.0, m.Skills[DamageSkill].Cap);
 
             return m.Skills[DamageSkill].Value;
         }
@@ -301,7 +301,7 @@ namespace Server.Spells
                     targetRS = 0;
                 */
 
-                m_Caster.CheckSkill(DamageSkill, 0.0, 120.0);
+                //m_Caster.CheckSkill(DamageSkill, 0.0, 120.0);
 
                 if (casterEI > targetRS)
                     scalar = (1.0 + ((casterEI - targetRS) / 500.0));
@@ -586,6 +586,9 @@ namespace Server.Spells
             double minSkill, maxSkill;
 
             GetCastSkills(out minSkill, out maxSkill);
+
+            if (DamageSkill != CastSkill)
+                Caster.CheckSkill(DamageSkill, 0.0, Caster.Skills[DamageSkill].Cap);
 
             return Caster.CheckSkill(CastSkill, minSkill, maxSkill);
         }
