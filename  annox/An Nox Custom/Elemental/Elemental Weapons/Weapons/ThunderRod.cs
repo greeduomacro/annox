@@ -51,12 +51,12 @@ namespace Server.Items
         }
 
 
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct)
         {
             cold = 0;
             nrgy = 100;
 
-            pois = fire = phys = 0;
+            pois = fire = phys = chaos = direct = 0;
         }
 
         public ThunderRod(Serial serial)

@@ -51,12 +51,12 @@ namespace Server.Items
         }
 
 
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct)
         {
             cold = 0;
             pois = 100;
 
-            fire = nrgy = phys = 0;
+            fire = nrgy = phys = chaos = direct = 0;
         }
 
         public PoisonSpear(Serial serial)

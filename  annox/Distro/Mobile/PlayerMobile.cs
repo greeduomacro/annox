@@ -111,6 +111,7 @@ namespace Server.Mobiles
         private PlayerFlag m_Flags;
         private int m_StepsTaken;
         private int m_Profession;
+        private bool m_IsStealthing; // IsStealthing should be moved to Server.Mobiles
 
         private DateTime m_LastOnline;
         private Server.Guilds.RankDefinition m_GuildRank;
@@ -214,6 +215,13 @@ namespace Server.Mobiles
         {
             get { return m_StepsTaken; }
             set { m_StepsTaken = value; }
+        }
+
+        [CommandProperty(AccessLevel.GameMaster)]
+        public bool IsStealthing // IsStealthing should be moved to Server.Mobiles
+        {
+            get { return m_IsStealthing; }
+            set { m_IsStealthing = value; }
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
@@ -943,6 +951,8 @@ namespace Server.Mobiles
             Spells.Sixth.InvisibilitySpell.RemoveTimer(this);
 
             base.RevealingAction();
+
+            m_IsStealthing = false; // IsStealthing should be moved to Server.Mobiles
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
@@ -1783,8 +1793,8 @@ namespace Server.Mobiles
 
         public override bool OnMoveOver(Mobile m)
         {
-            if (Alive && m is BaseCreature && !((BaseCreature)m).Controlled)
-                return false;
+            if (m is BaseCreature && !((BaseCreature)m).Controlled)
+                return (!Alive || !m.Alive || IsDeadBondedPet || m.IsDeadBondedPet) || (Hidden && m.AccessLevel > AccessLevel.Player);
 
             return base.OnMoveOver(m);
         }
@@ -3330,7 +3340,21 @@ namespace Server.Mobiles
                 Type t = m.GetType();
 
                 if (t == oldType || t == newType)
-                    Send(new MobileMoving(m, Notoriety.Compute(this, m)));
+                {
+                    NetState ns = this.NetState;
+
+                    if (ns != null)
+                    {
+                        if (ns.IsPost7000)
+                        {
+                            ns.Send(new MobileMoving(m, Notoriety.Compute(this, m)));
+                        }
+                        else
+                        {
+                            ns.Send(new MobileMovingOld(m, Notoriety.Compute(this, m)));
+                        }
+                    }
+                }
             }
         }
         #endregion

@@ -23,13 +23,14 @@ namespace Server.Items
             Slayer = SlayerName.DragonSlaying;
             Attributes.BonusMana = 50;
         }
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
         {
             phys = 40;
             cold = 0;
             fire = 20;
             nrgy = 40;
             pois = 0;
+            chaos = direct = 0;
         }
         public NorseVikingSword(Serial serial)
             : base(serial)

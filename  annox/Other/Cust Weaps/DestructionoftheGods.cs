@@ -37,13 +37,14 @@ namespace Server.Items
             LootType = LootType.Blessed;
 
         }
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
         {
             phys = 25;
             cold = 25;
             fire = 0;
             nrgy = 50;
             pois = 0;
+            chaos = direct = 0;
         }
         public DestructionoftheGods(Serial serial)
             : base(serial)

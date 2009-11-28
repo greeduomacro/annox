@@ -23,13 +23,14 @@ namespace Server.Items
             Attributes.WeaponSpeed = 75;
             LootType = LootType.Blessed;
         }
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
         {
             phys = 100;
             cold = 0;
             fire = 0;
             nrgy = 0;
             pois = 0;
+            chaos = direct = 0;
         }
         public SpikesRevenge(Serial serial)
             : base(serial)

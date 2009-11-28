@@ -50,12 +50,12 @@ namespace Server.Items
         }
 
 
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct)
         {
             nrgy = 100;
             pois = 0;
 
-            fire = cold = phys = 0;
+            fire = cold = phys = chaos = direct = 0;
         }
 
         public AirStaff(Serial serial)

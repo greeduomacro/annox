@@ -27,13 +27,14 @@ namespace Server.Items
             LootType = LootType.Blessed;
             Slayer = SlayerName.DragonSlaying;
         }
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
         {
             phys = 50;
             cold = 0;
             fire = 50;
             nrgy = 0;
             pois = 0;
+            chaos = direct = 0;
         }
         public QuickBlade(Serial serial)
             : base(serial)

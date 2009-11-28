@@ -26,13 +26,14 @@ namespace Server.Items
             Attributes.RegenHits = 35;
             Attributes.WeaponSpeed = 20;
         }
-        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy)
+        public override void GetDamageTypes(Mobile wielder, out int phys, out int fire, out int cold, out int pois, out int nrgy, out int chaos, out int direct )
         {
             phys = 100;
             cold = 0;
             fire = 0;
             nrgy = 0;
             pois = 0;
+            chaos = direct = 0;
         }
         public MinersPickaxe(Serial serial)
             : base(serial)
