@@ -35,7 +35,7 @@ namespace Server.Items
                     ///
                     i++;
                 }
-                m.LaunchBrowser("www.connectuo.com/index.php?page=shards&do=vote&id=16");
+                m.LaunchBrowser("http://www.uogateway.com/shard.php?id=231&act=vote");
             }
             else
             {
