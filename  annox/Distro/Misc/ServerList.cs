@@ -38,7 +38,7 @@ namespace Server.Misc
          */
 
         public static readonly string Address = null;
-        public static readonly string ServerName = "An Nox the Fourth Age";
+        public static readonly string ServerName = "the Fourth Age";
 
         public static readonly bool AutoDetect = true;
 
