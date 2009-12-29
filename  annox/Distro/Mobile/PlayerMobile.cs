@@ -52,6 +52,9 @@ namespace Server.Mobiles
         AcceptGuildInvites = 0x00000800,
         DisplayChampionTitle = 0x00001000,
         HasStatReward = 0x00002000,
+        #region Scroll of Alacrity
+        AcceleratedSkill = 0x00080000,
+        #endregion
         //05AUG2008 Challenge Game *** START ****
         isinchal = 0x00100001,
         canbechal = 0x00100002,
@@ -364,6 +367,62 @@ namespace Server.Mobiles
         }
         #endregion
 
+        #region Auto Arrow Recovery
+        private Dictionary<Type, int> m_RecoverableAmmo = new Dictionary<Type, int>();
+
+        public Dictionary<Type, int> RecoverableAmmo
+        {
+            get { return m_RecoverableAmmo; }
+        }
+
+        public void RecoverAmmo()
+        {
+            if (Core.SE && Alive)
+            {
+                foreach (KeyValuePair<Type, int> kvp in m_RecoverableAmmo)
+                {
+                    if (kvp.Value > 0)
+                    {
+                        Item ammo = null;
+
+                        try
+                        {
+                            ammo = Activator.CreateInstance(kvp.Key) as Item;
+                        }
+                        catch
+                        {
+                        }
+
+                        if (ammo != null)
+                        {
+                            string name = ammo.Name;
+                            ammo.Amount = kvp.Value;
+
+                            if (name == null)
+                            {
+                                if (ammo is Arrow)
+                                    name = "arrow";
+                                else if (ammo is Bolt)
+                                    name = "bolt";
+                            }
+
+                            if (name != null && ammo.Amount > 1)
+                                name = String.Format("{0}s", name);
+
+                            if (name == null)
+                                name = String.Format("#{0}", ammo.LabelNumber);
+
+                            PlaceInBackpack(ammo);
+                            SendLocalizedMessage(1073504, String.Format("{0}\t{1}", ammo.Amount, name)); // You recover ~1_NUM~ ~2_AMMO~.
+                        }
+                    }
+                }
+
+                m_RecoverableAmmo.Clear();
+            }
+        }
+        #endregion
+
         private DateTime m_AnkhNextUse;
 
         [CommandProperty(AccessLevel.GameMaster)]
@@ -372,6 +431,35 @@ namespace Server.Mobiles
             get { return m_AnkhNextUse; }
             set { m_AnkhNextUse = value; }
         }
+
+        private DateTime m_PeacedUntil;
+
+        [CommandProperty(AccessLevel.GameMaster)]
+        public DateTime PeacedUntil
+        {
+            get { return m_PeacedUntil; }
+            set { m_PeacedUntil = value; }
+        }
+
+        #region Scroll of Alacrity
+        private DateTime m_AcceleratedStart;
+
+        [CommandProperty(AccessLevel.GameMaster)]
+        public DateTime AcceleratedStart
+        {
+            get { return m_AcceleratedStart; }
+            set { m_AcceleratedStart = value; }
+        }
+
+        private SkillName m_AcceleratedSkill;
+
+        [CommandProperty(AccessLevel.GameMaster)]
+        public SkillName AcceleratedSkill
+        {
+            get { return m_AcceleratedSkill; }
+            set { m_AcceleratedSkill = value; }
+        }
+        #endregion
 
         public static Direction GetDirection4(Point3D from, Point3D to)
         {
@@ -399,6 +487,16 @@ namespace Server.Mobiles
         {
             if (!base.OnDroppedItemToWorld(item, location))
                 return false;
+
+            IPooledEnumerable mobiles = Map.GetMobilesInRange(location, 0);
+
+            if (mobiles.GetEnumerator().MoveNext())
+            {
+                mobiles.Free();
+                return false;
+            }
+            else
+                mobiles.Free();
 
             BounceInfo bi = item.GetBounce();
 
@@ -1870,6 +1968,9 @@ namespace Server.Mobiles
             if (m_SentHonorContext != null)
                 m_SentHonorContext.OnSourceDamaged(from, amount);
 
+            if (willKill && from is PlayerMobile)
+                Timer.DelayCall(TimeSpan.FromSeconds(10), new TimerCallback(((PlayerMobile)from).RecoverAmmo));
+
             base.OnDamage(amount, from, willKill);
         }
 
@@ -1905,6 +2006,12 @@ namespace Server.Mobiles
             }
         }
 
+        public override void OnWarmodeChanged()
+        {
+            if (!Warmode)
+                Timer.DelayCall(TimeSpan.FromSeconds(10), new TimerCallback(RecoverAmmo));
+        }
+
         private Mobile m_InsuranceAward;
         private int m_InsuranceCost;
         private int m_InsuranceBonus;
@@ -1932,6 +2039,8 @@ namespace Server.Mobiles
                 m_ReceivedHonorContext.OnTargetKilled();
             if (m_SentHonorContext != null)
                 m_SentHonorContext.OnSourceKilled();
+
+            RecoverAmmo();
 
             return base.OnBeforeDeath();
         }
@@ -2495,6 +2604,12 @@ namespace Server.Mobiles
 
             switch (version)
             {
+                case 28:
+                    {
+                        m_PeacedUntil = reader.ReadDateTime();
+
+                        goto case 27;
+                    }
                 //05AUG2008 Challenge Game *** START ***
                 //case 26:
                 //    m_Wins = reader.ReadInt();
@@ -2801,8 +2916,9 @@ namespace Server.Mobiles
             //writer.Write(m_Loses);
             //05AUG2008 Challenge Game *** END  ***
 
-            writer.Write((int)27); // version
+            writer.Write((int)28); // version
 
+            writer.Write((DateTime)m_PeacedUntil);
             writer.Write((DateTime)m_AnkhNextUse);
             writer.Write(m_AutoStabled, true);
 

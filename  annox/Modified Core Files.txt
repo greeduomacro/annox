@@ -48,6 +48,8 @@ md Bestiary
 md Data\Bestiary
 xcopy "Scripts\Custom\Server\Bestiary by Arul\Bestiary\*.*" Bestiary /s
 xcopy "Scripts\Custom\Server\Bestiary by Arul\Data\*.*" Data\Bestiary\ /s
+md C:\Inetpub\wwwroot\status\bestiary
+xcopy "Scripts\Custom\Server\Bestiary by Arul\Bestiary\*.*" "C:\Inetpub\wwwroot\status\bestiary" /s
 
 rem MapWebStatus Setup
 md C:\Inetpub\wwwroot\status\map

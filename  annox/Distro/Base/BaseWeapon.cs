@@ -1011,7 +1011,15 @@ namespace Server.Items
                     Spell sp = attacker.Spell as Spell;
 
                     canSwing = (sp == null || !sp.IsCasting || !sp.BlocksMovement);
+
+                    if (canSwing)
+                    {
+                        PlayerMobile p = attacker as PlayerMobile;
+
+                        canSwing = (p == null || p.PeacedUntil <= DateTime.Now);
+                    }
                 }
+
             }
 
             if (canSwing && attacker.HarmfulCheck(defender))
