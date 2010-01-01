@@ -19,7 +19,7 @@ namespace Server.Bestiary
         /// <summary>
         /// Set to your shard's name
         /// </summary>
-        public const string ShardName = "Name";
+        public const string ShardName = "An Nox";
 
         /// <summary>
         /// Heart and soul of the system, first it analyzes all mobiles and then generates a webpage 
@@ -54,6 +54,15 @@ namespace Server.Bestiary
                 int index = 0;
                 char letter = 'a';
 
+                writer.WriteLine("<html>");
+                writer.WriteLine("<head>");
+                writer.WriteLine("<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" />");
+                writer.WriteLine("<center>");
+                writer.WriteLine("<img src=\"http://annox.no-ip.com/images/AnNoxBanner-05NOV2009.jpg\" alt=\"annox.no-ip.com\" />");
+                writer.WriteLine("</center>");
+                writer.WriteLine("</head>");
+                writer.WriteLine("<body>");
+                writer.WriteLine("<center>");
                 foreach (List<MobileEntry> var in entries)
                 {
                     if (var.Count != 0)
@@ -88,6 +97,9 @@ namespace Server.Bestiary
                         writer.WriteLine("	<hr noshade />");
                     }
                 }
+                writer.WriteLine("</center>");
+                writer.WriteLine("</body>");
+                writer.WriteLine("</html>");
             }
             // all mobiles, unless they're empty, have been indexed. Our job's done!
         }
